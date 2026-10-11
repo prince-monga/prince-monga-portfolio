@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      SEO NOTE — Client-Side Rendering Limitation:
+      This is a React SPA. Page-specific <title> and <meta> tags are injected
+      client-side via react-helmet-async. Googlebot can render JavaScript and
+      will see the correct metadata, but other crawlers and social preview tools
+      may only see the fallback tags below.
+
+      RECOMMENDED NEXT STEP: Add static prerendering (see PHASE 4 notes in README)
+      using a tool like react-snap or migrating to a framework with SSG support
+      (e.g. Next.js, Remix, or Astro) for guaranteed metadata delivery to all crawlers.
+    -->
+
+    <!-- Fallback title and description — overridden per-page by react-helmet-async -->
+    <title>Prince Monga | Full-Stack Developer &amp; Cybersecurity Learner</title>
+    <meta
+      name="description"
+      content="Prince Monga is a full-stack developer and cybersecurity learner from Gurugram, India. Building web applications with React, Java, and Python while documenting the journey openly."
+    />
+
+    <!--
+      CANONICAL: Set siteConfig.canonicalUrl in src/data/content.ts once you have a domain.
+      The canonical tag is injected per-page by PageMeta.tsx when canonicalUrl is configured.
+    -->
+
+    <!-- Open Graph fallback — per-page values injected by PageMeta.tsx -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Prince Monga" />
+    <meta property="og:title" content="Prince Monga | Full-Stack Developer &amp; Cybersecurity Learner" />
+    <meta
+      property="og:description"
+      content="Full-stack developer and cybersecurity learner — React, Java, Python, and network security."
+    />
+    <!--
+      OG IMAGE: Set siteConfig.ogImage in src/data/content.ts to an absolute URL
+      pointing to a 1200×630 PNG once you have created one and deployed to your domain.
+    -->
+
+    <!-- Twitter / X Card fallback -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Prince Monga | Full-Stack Developer &amp; Cybersecurity Learner" />
+    <meta
+      name="twitter:description"
+      content="Full-stack developer and cybersecurity learner — React, Java, Python, and network security."
+    />
+
+    <!--
+      GOOGLE SEARCH CONSOLE: Set siteConfig.gscVerification in src/data/content.ts
+      to the value from your GSC verification meta tag. It will be injected by PageMeta.tsx.
+    -->
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!--
+      FONTS — Performance notes:
+      - preconnect reduces DNS + TLS handshake time for Google Fonts
+      - Inter 400/500/600/700 covers all weights used in the design
+      - JetBrains Mono 400/500 covers code and monospace elements
+      - font-display=swap is set in the URL to prevent render-blocking
+      - The preload link below hints the browser to fetch Inter early (LCP improvement)
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

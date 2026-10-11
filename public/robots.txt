@@ -1,0 +1,12 @@
+# robots.txt for princemonga.dev
+# Update the Sitemap URL below once your domain is confirmed.
+
+User-agent: *
+Allow: /
+
+# Exclude journal and streak from indexing — thin/personal content
+Disallow: /journal
+Disallow: /streak
+
+# Sitemap location — update domain before deploying
+Sitemap: https://REPLACE-YOUR-DOMAIN.com/sitemap.xml
