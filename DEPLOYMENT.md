@@ -38,7 +38,7 @@ Do not include `/api/v1`, a path, credentials, or a trailing route in either ori
 
 - Root directory: `backend`
 - Runtime: Node.js 20 or newer
-- Build command: `npm ci && npm run build`
+- Build command: `npm run build:render` (runs `npm ci --include=dev && npm run build`)
 - Start command: `npm start` (equivalent to `node dist/server.js`)
 - Health check path: `/api/v1/health`
 - The server listens on `0.0.0.0` using the platform `PORT`; do not hard-code a public port.

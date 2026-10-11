@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "build:render": "npm ci --include=dev && npm run build",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "migrate": "tsx migrations/run.ts",
