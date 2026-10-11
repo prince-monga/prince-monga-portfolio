@@ -6,7 +6,7 @@ No production domain, credentials, database, or R2 account were available during
 
 ## Recommended topology
 
-- **Frontend:** Cloudflare Pages, connected to this GitHub repository, with the repository root as the project root. The static output and `_headers` file are compatible with Pages. Vercel can serve the Vite output too, but configure equivalent SPA fallback and response headers before selecting it.
+- **Frontend:** Cloudflare Pages, connected to this GitHub repository, with the repository root as the project root. The static output and `_headers` file are compatible with Pages. Vercel can serve the Vite output too; the root `vercel.json` rewrites the known React routes to `index.html` for direct navigation and refresh, without rewriting `/api/*` or general asset paths.
 - **API:** Render Web Service, rooted at `backend/`. Keep the API separate from the static frontend.
 - **Database:** Managed PostgreSQL (for example Neon). Use its TLS-enabled pooled connection URL for the API, and a direct/non-pooled URL for schema migrations where the provider recommends that.
 - **Images:** Private Cloudflare R2 bucket, accessed only with backend credentials. This app proxies image reads through its API and has no public R2 bucket URL setting.
