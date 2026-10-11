@@ -1,9 +1,14 @@
 import { GraduationCap, MapPin, Code2, Shield, ExternalLink } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import PageMeta from '../components/PageMeta'
+import ContentImage from '../components/ContentImage'
 import { siteConfig, skillGroups, certifications, githubAchievements } from '../data/content'
+import { publicApi } from '../lib/publicApi'
+import { usePublicFetch } from '../hooks/usePublicFetch'
 
 export default function AboutPage() {
+  const { data } = usePublicFetch(() => publicApi.siteImages.get())
+
   return (
     <>
       <PageMeta
@@ -19,6 +24,14 @@ export default function AboutPage() {
         <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-10">
           Full-stack developer and cybersecurity learner from Gurugram, India.
         </p>
+
+        {data?.data.profile_image_url && (
+          <ContentImage
+            src={data.data.profile_image_url}
+            alt={data.data.profile_image_alt}
+            className="mb-8 h-24 w-24 rounded-full object-cover"
+          />
+        )}
 
         {/* Quick facts */}
         <div className="flex flex-wrap gap-4 mb-10 pb-10 border-b border-neutral-100 dark:border-neutral-800">

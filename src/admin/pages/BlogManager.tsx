@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react'
-import { blog as api, type BlogPost } from '../api'
+import { blog as api, type BlogPost, type ManagedImage } from '../api'
 import { useFetch } from '../hooks/useFetch'
+import ImageManager from '../components/ImageManager'
 import {
   PageHeader, Button, StatusBadge, LoadingState, ErrorState, EmptyState,
   ConfirmDialog, Modal, Field, Input, Textarea, Select, Alert, Pagination,
@@ -12,6 +13,7 @@ const STATUSES = ['draft', 'published', 'archived']
 const empty: Partial<BlogPost> = {
   title: '', slug: '', excerpt: '', content: '', category: '',
   tags: [], seo_title: '', meta_description: '', cover_image_url: '', status: 'draft',
+  cover_image_asset_id: null, cover_image_alt: '', article_images: [],
 }
 
 function slugify(s: string) {
@@ -38,21 +40,35 @@ export default function BlogManager() {
   const [formError, setFormError] = useState<string | null>(null)
   const [tagInput, setTagInput] = useState('')
   const [tab, setTab] = useState<'write' | 'seo'>('write')
+  const [coverUploading, setCoverUploading] = useState(false)
+  const [articleImagesUploading, setArticleImagesUploading] = useState(false)
+  const [loadingEditId, setLoadingEditId] = useState<number | null>(null)
+  const [editLoadError, setEditLoadError] = useState('')
 
   function openNew() {
     setEditing({ ...empty })
     setIsNew(true)
     setFormError(null)
+    setEditLoadError('')
     setTagInput('')
     setTab('write')
   }
 
-  function openEdit(p: BlogPost) {
-    setEditing({ ...p })
-    setIsNew(false)
+  async function openEdit(p: BlogPost) {
+    setLoadingEditId(p.id)
+    setEditLoadError('')
     setFormError(null)
-    setTagInput('')
-    setTab('write')
+    try {
+      const response = await api.get(p.id)
+      setEditing({ ...response.data })
+      setIsNew(false)
+      setTagInput('')
+      setTab('write')
+    } catch (error) {
+      setEditLoadError(error instanceof Error ? error.message : 'Could not load article')
+    } finally {
+      setLoadingEditId(null)
+    }
   }
 
   function closeModal() {
@@ -80,7 +96,7 @@ export default function BlogManager() {
   }
 
   async function handleSave() {
-    if (!editing) return
+    if (!editing || coverUploading || articleImagesUploading || saving) return
     setFormError(null)
     setSaving(true)
     try {
@@ -125,6 +141,7 @@ export default function BlogManager() {
         action={<Button onClick={openNew}><Plus size={14} />New post</Button>}
       />
 
+      {editLoadError && <Alert type="error" message={editLoadError} />}
       {loading && <LoadingState />}
       {error && <ErrorState message={error} onRetry={refetch} />}
       {!loading && !error && rows.length === 0 && (
@@ -173,6 +190,7 @@ export default function BlogManager() {
                       )}
                       <button
                         onClick={() => openEdit(p)}
+                        disabled={loadingEditId !== null}
                         className="p-1.5 text-neutral-500 hover:text-neutral-200 transition-colors"
                         aria-label="Edit"
                       >
@@ -300,14 +318,35 @@ export default function BlogManager() {
                   </div>
                 </Field>
 
-                <Field label="Cover image URL">
-                  <Input
-                    type="url"
-                    value={editing.cover_image_url ?? ''}
-                    onChange={e => setEditing(ed => ({ ...ed!, cover_image_url: e.target.value }))}
-                    placeholder="https://..."
-                  />
-                </Field>
+                <ImageManager
+                  label="Featured cover image"
+                  images={editing.cover_image_url
+                    ? [{
+                        asset_id: editing.cover_image_asset_id ?? 0,
+                        url: editing.cover_image_url,
+                        alt_text: editing.cover_image_alt ?? '',
+                        caption: '',
+                      }]
+                    : []}
+                  onChange={(images: ManagedImage[]) => {
+                    const image = images[0]
+                    setEditing(ed => ({
+                      ...ed!,
+                      cover_image_url: image?.url ?? '',
+                      cover_image_asset_id: image?.asset_id ? image.asset_id : null,
+                      cover_image_alt: image?.alt_text ?? '',
+                    }))
+                  }}
+                  onUploadingChange={setCoverUploading}
+                />
+                <ImageManager
+                  label="Article images"
+                  images={editing.article_images ?? []}
+                  onChange={images => setEditing(ed => ({ ...ed!, article_images: images }))}
+                  onUploadingChange={setArticleImagesUploading}
+                  multiple
+                  maxImages={20}
+                />
               </>
             )}
 
@@ -335,7 +374,11 @@ export default function BlogManager() {
 
             <div className="flex gap-3 justify-end pt-2 border-t border-neutral-800">
               <Button variant="secondary" onClick={closeModal}>Cancel</Button>
-              <Button onClick={handleSave} loading={saving}>
+              <Button
+                onClick={handleSave}
+                loading={saving}
+                disabled={coverUploading || articleImagesUploading}
+              >
                 {isNew ? 'Create post' : 'Save changes'}
               </Button>
             </div>

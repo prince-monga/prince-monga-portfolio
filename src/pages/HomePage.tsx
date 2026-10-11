@@ -6,8 +6,14 @@ import JourneyPreview from '../components/JourneyPreview'
 import DailyBuilding from '../components/DailyBuilding'
 import AboutPreview from '../components/AboutPreview'
 import Contact from '../components/Contact'
+import { publicApi } from '../lib/publicApi'
+import { usePublicFetch } from '../hooks/usePublicFetch'
+import { siteConfig } from '../data/content'
 
 export default function HomePage() {
+  const { data } = usePublicFetch(() => publicApi.siteImages.get())
+  const socialImage = data?.data.og_image_url || siteConfig.ogImage || undefined
+
   return (
     <>
       <Helmet>
@@ -16,6 +22,9 @@ export default function HomePage() {
           name="description"
           content="Prince Monga is a full-stack developer and cybersecurity learner from Gurugram, India. Building with React, Java, and Python while documenting the journey openly."
         />
+        {socialImage && <meta property="og:image" content={socialImage} />}
+        {socialImage && <meta name="twitter:image" content={socialImage} />}
+        <meta name="twitter:card" content={socialImage ? 'summary_large_image' : 'summary'} />
       </Helmet>
 
       <main id="main-content">

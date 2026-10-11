@@ -1,11 +1,15 @@
 import express from 'express'
 import helmet from 'helmet'
 import cors from 'cors'
+import { AppError, errorHandler } from './middleware/errorHandler'
 import publicRoutes from './routes/public'
 import adminRoutes from './routes/admin'
-import { errorHandler } from './middleware/errorHandler'
 
 const app = express()
+
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1)
+}
 
 // ─── Security headers ─────────────────────────────────────────────────────────
 app.use(helmet())
@@ -20,10 +24,10 @@ app.use(cors({
   origin: (origin, cb) => {
     // Allow requests with no origin (e.g. curl, server-to-server)
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true)
-    cb(new Error('Not allowed by CORS'))
+    cb(new AppError(403, 'Origin not allowed'))
   },
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Image-Filename'],
 }))
 
 // ─── Body parsing ─────────────────────────────────────────────────────────────

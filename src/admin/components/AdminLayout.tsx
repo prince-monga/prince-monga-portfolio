@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import {
   LayoutDashboard, FolderKanban, FileText, MapPin, BookOpen,
   Flame, Inbox, Settings, LogOut, Menu, X, ExternalLink,
@@ -87,7 +88,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   )
 
   return (
-    <div className="min-h-screen flex bg-neutral-950 text-neutral-100">
+    <>
+      <Helmet>
+        <title>Admin | Prince Monga</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      <div className="min-h-screen flex bg-neutral-950 text-neutral-100">
       {/* Desktop sidebar */}
       <div className="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:w-56">
         {sidebar}
@@ -108,7 +114,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* Main content */}
-      <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
+      <div className="flex-1 lg:ml-56 flex flex-col min-h-screen min-w-0">
         {/* Mobile topbar */}
         <header className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-neutral-800 bg-neutral-900">
           <button
@@ -123,10 +129,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </span>
         </header>
 
-        <main className="flex-1 p-6 max-w-6xl w-full mx-auto">
+        <main className="flex-1 p-6 max-w-6xl w-full mx-auto min-w-0">
           {children}
         </main>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

@@ -1,5 +1,6 @@
 // Public API client — only fetches publicly permitted data
-const BASE = '/api/v1'
+
+import { API_BASE, resolveMediaUrls } from './apiConfig'
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -8,21 +9,24 @@ export class ApiError extends Error {
 }
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`)
+  const res = await fetch(`${API_BASE}${path}`)
   if (!res.ok) {
     const json = await res.json().catch(() => ({}))
     throw new ApiError(res.status, json.error ?? `HTTP ${res.status}`)
   }
-  return res.json() as Promise<T>
+  return resolveMediaUrls(await res.json()) as T
 }
 
 async function post<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
-  const json = await res.json()
+  const json = resolveMediaUrls(await res.json()) as {
+    success?: boolean
+    error?: string
+  }
   if (!json.success) throw new ApiError(res.status, json.error ?? 'Request failed')
   return json as T
 }
@@ -38,6 +42,30 @@ export interface SingleResponse<T> {
   data: T
 }
 
+export interface PublicSiteImages {
+  profile_image_url: string | null
+  profile_image_alt: string
+  og_image_url: string | null
+  og_image_alt: string
+}
+
+export interface PublicSiteSettings {
+  display_name: string | null
+  tagline: string | null
+  github_url: string | null
+  linkedin_url: string | null
+  twitter_url: string | null
+  email: string | null
+  updated_at: string
+}
+
+export interface PublicImage {
+  asset_id: number
+  url: string
+  alt_text: string
+  caption: string
+}
+
 // ─── Projects ─────────────────────────────────────────────────────────────────
 
 export interface ApiProject {
@@ -51,6 +79,9 @@ export interface ApiProject {
   repository_url: string | null
   live_demo_url: string | null
   image_url: string | null
+  image_asset_id: number | null
+  image_alt_text: string
+  gallery_images: PublicImage[]
   featured: boolean
   status: string
   created_at: string
@@ -58,6 +89,12 @@ export interface ApiProject {
 }
 
 export const publicApi = {
+  siteImages: {
+    get: () => get<SingleResponse<PublicSiteImages>>('/site-images'),
+  },
+  siteSettings: {
+    get: () => get<SingleResponse<PublicSiteSettings>>('/site-settings'),
+  },
   projects: {
     list: (params?: { page?: number; limit?: number; category?: string; featured?: boolean }) => {
       const q = new URLSearchParams()
@@ -124,6 +161,9 @@ export interface ApiBlogPost {
   seo_title: string | null
   meta_description: string | null
   cover_image_url: string | null
+  cover_image_asset_id: number | null
+  cover_image_alt: string
+  article_images: PublicImage[]
   status: string
   published_at: string | null
   created_at: string
@@ -139,6 +179,10 @@ export interface ApiJourneyEvent {
   event_date: string
   category: string
   visibility: string
+  image_asset_id: number | null
+  image_url: string | null
+  image_alt_text: string
+  image_caption: string
   created_at: string
   updated_at: string
 }
@@ -153,6 +197,10 @@ export interface ApiDailyLog {
   next_steps: string
   minutes_worked: number | null
   visibility: string
+  image_asset_id: number | null
+  image_url: string | null
+  image_alt_text: string
+  image_caption: string
   created_at: string
   updated_at: string
 }

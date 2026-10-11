@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { GraduationCap, Briefcase, BookOpen, Star, Loader2 } from 'lucide-react'
 import PageMeta from '../components/PageMeta'
+import ContentImage from '../components/ContentImage'
 import { publicApi, type ApiJourneyEvent } from '../lib/publicApi'
 import { journey as staticJourney } from '../data/content'
 import { usePublicFetch } from '../hooks/usePublicFetch'
@@ -32,6 +33,9 @@ interface DisplayEvent {
   title: string
   description: string
   category: Category
+  imageUrl?: string | null
+  imageAlt?: string
+  imageCaption?: string
   isCurrent?: boolean
 }
 
@@ -42,6 +46,9 @@ function fromApi(e: ApiJourneyEvent): DisplayEvent {
     title: e.title,
     description: e.description,
     category: e.category as Category,
+    imageUrl: e.image_url,
+    imageAlt: e.image_alt_text,
+    imageCaption: e.image_caption,
   }
 }
 
@@ -144,6 +151,21 @@ export default function JourneyPage() {
                   <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed max-w-xl">
                     {ev.description}
                   </p>
+
+                  {ev.imageUrl && (
+                    <figure className="mt-4 max-w-xl">
+                      <ContentImage
+                        src={ev.imageUrl}
+                        alt={ev.imageAlt ?? ''}
+                        className="max-h-96 w-full rounded-lg border border-neutral-200 object-cover dark:border-neutral-800"
+                      />
+                      {ev.imageCaption && (
+                        <figcaption className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                          {ev.imageCaption}
+                        </figcaption>
+                      )}
+                    </figure>
+                  )}
                 </li>
               )
             })}

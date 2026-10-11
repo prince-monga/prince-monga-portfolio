@@ -30,12 +30,21 @@ export async function adminListPosts(req: Request, res: Response, next: NextFunc
   } catch (err) { next(err) }
 }
 
+export async function adminGetPost(req: Request, res: Response, next: NextFunction) {
+  try {
+    const post = await repo.findPostById(parseInt(param(req.params.id), 10))
+    if (!post) return next(new AppError(404, 'Post not found'))
+    single(res, post)
+  } catch (err) { next(err) }
+}
+
 export async function adminCreatePost(req: Request, res: Response, next: NextFunction) {
   try {
     const post = await repo.insertPost(req.body)
     single(res, post, 201)
   } catch (err: unknown) {
     if ((err as { code?: string }).code === '23505') return next(new AppError(409, 'Slug already exists'))
+    if ((err as { code?: string }).code === '23503') return next(new AppError(400, 'One or more selected images are no longer available'))
     next(err)
   }
 }
@@ -48,6 +57,7 @@ export async function adminUpdatePost(req: Request, res: Response, next: NextFun
     single(res, post)
   } catch (err: unknown) {
     if ((err as { code?: string }).code === '23505') return next(new AppError(409, 'Slug already exists'))
+    if ((err as { code?: string }).code === '23503') return next(new AppError(400, 'One or more selected images are no longer available'))
     next(err)
   }
 }

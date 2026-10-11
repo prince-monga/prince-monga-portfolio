@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Mail, Github, Linkedin, CheckCircle, AlertCircle } from 'lucide-react'
 import PageMeta from '../components/PageMeta'
-import { siteConfig } from '../data/content'
 import { publicApi, ApiError } from '../lib/publicApi'
+import { useSiteSettings } from '../context/SiteSettings'
 
 const projectTypes = [
   'Business website',
@@ -28,8 +28,9 @@ const inputClass =
 const labelClass = 'block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5'
 
 export default function ContactPage() {
-  const hasGithub = !siteConfig.github.startsWith('<!--')
-  const hasLinkedin = !siteConfig.linkedin.startsWith('<!--')
+  const { settings } = useSiteSettings()
+  const hasGithub = Boolean(settings.githubUrl)
+  const hasLinkedin = Boolean(settings.linkedinUrl)
 
   const [form, setForm] = useState({
     name: '',
@@ -107,7 +108,7 @@ export default function ContactPage() {
           {/* Form */}
           <div className="lg:col-span-2">
             {status === 'success' ? (
-              <div className="flex flex-col items-start gap-4 py-8">
+              <div role="status" className="flex flex-col items-start gap-4 py-8">
                 <div className="flex items-center gap-3 text-green-600 dark:text-green-400">
                   <CheckCircle size={20} />
                   <span className="font-medium text-sm">Message sent</span>
@@ -130,7 +131,7 @@ export default function ContactPage() {
                 noValidate
               >
                 {status === 'error' && serverError && (
-                  <div className="flex items-start gap-2 px-4 py-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-md">
+                  <div role="alert" className="flex items-start gap-2 px-4 py-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-md">
                     <AlertCircle size={14} className="text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <p className="text-xs text-red-700 dark:text-red-300">{serverError}</p>
                   </div>
@@ -264,12 +265,14 @@ export default function ContactPage() {
               <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
                 Direct contact
               </h2>
-              <a
-                href={`mailto:${siteConfig.email}`}
-                className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                <Mail size={14} /> {siteConfig.email}
-              </a>
+              {settings.email && (
+                <a
+                  href={`mailto:${settings.email}`}
+                  className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  <Mail size={14} /> {settings.email}
+                </a>
+              )}
             </div>
 
             {(hasGithub || hasLinkedin) && (
@@ -280,7 +283,7 @@ export default function ContactPage() {
                 <div className="space-y-2">
                   {hasGithub && (
                     <a
-                      href={siteConfig.github}
+                      href={settings.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
@@ -290,7 +293,7 @@ export default function ContactPage() {
                   )}
                   {hasLinkedin && (
                     <a
-                      href={siteConfig.linkedin}
+                      href={settings.linkedinUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"

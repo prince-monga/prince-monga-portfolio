@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react'
-import { projects as api, type Project } from '../api'
+import { projects as api, type ManagedImage, type Project } from '../api'
 import { useFetch } from '../hooks/useFetch'
+import ImageManager from '../components/ImageManager'
 import {
   PageHeader, Button, StatusBadge, LoadingState, ErrorState, EmptyState,
   ConfirmDialog, Modal, Field, Input, Textarea, Select, Alert, Pagination,
@@ -13,6 +14,7 @@ const STATUSES = ['draft', 'published', 'archived']
 const empty: Partial<Project> = {
   title: '', slug: '', summary: '', description: '', technologies: [],
   category: 'Full Stack', repository_url: '', live_demo_url: '', image_url: '',
+  image_asset_id: null, image_alt_text: '', gallery_images: [],
   featured: false, status: 'draft',
 }
 
@@ -31,6 +33,8 @@ export default function ProjectsManager() {
   const [deleting, setDeleting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [techInput, setTechInput] = useState('')
+  const [coverUploading, setCoverUploading] = useState(false)
+  const [galleryUploading, setGalleryUploading] = useState(false)
 
   function openNew() {
     setEditing({ ...empty })
@@ -71,7 +75,7 @@ export default function ProjectsManager() {
   }
 
   async function handleSave() {
-    if (!editing) return
+    if (!editing || coverUploading || galleryUploading || saving) return
     setFormError(null)
     setSaving(true)
     try {
@@ -285,14 +289,36 @@ export default function ProjectsManager() {
               />
             </Field>
 
-            <Field label="Thumbnail URL">
-              <Input
-                type="url"
-                value={editing.image_url ?? ''}
-                onChange={e => setEditing(ed => ({ ...ed!, image_url: e.target.value }))}
-                placeholder="https://..."
-              />
-            </Field>
+            <ImageManager
+              label="Project cover image"
+              images={editing.image_url
+                ? [{
+                    asset_id: editing.image_asset_id ?? 0,
+                    url: editing.image_url,
+                    alt_text: editing.image_alt_text ?? '',
+                    caption: '',
+                  }]
+                : []}
+              onChange={(images: ManagedImage[]) => {
+                const image = images[0]
+                setEditing(ed => ({
+                  ...ed!,
+                  image_url: image?.url ?? '',
+                  image_asset_id: image?.asset_id ? image.asset_id : null,
+                  image_alt_text: image?.alt_text ?? '',
+                }))
+              }}
+              onUploadingChange={setCoverUploading}
+            />
+
+            <ImageManager
+              label="Additional project screenshots"
+              images={editing.gallery_images ?? []}
+              onChange={images => setEditing(ed => ({ ...ed!, gallery_images: images }))}
+              onUploadingChange={setGalleryUploading}
+              multiple
+              maxImages={12}
+            />
 
             <label className="flex items-center gap-2 text-sm text-neutral-300 cursor-pointer">
               <input
@@ -306,7 +332,7 @@ export default function ProjectsManager() {
 
             <div className="flex gap-3 justify-end pt-2 border-t border-neutral-800">
               <Button variant="secondary" onClick={closeModal}>Cancel</Button>
-              <Button onClick={handleSave} loading={saving}>
+              <Button onClick={handleSave} loading={saving} disabled={coverUploading || galleryUploading}>
                 {isNew ? 'Create project' : 'Save changes'}
               </Button>
             </div>

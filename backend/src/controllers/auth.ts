@@ -1,9 +1,12 @@
 import type { Request, Response, NextFunction } from 'express'
+import { randomBytes } from 'node:crypto'
 import argon2 from 'argon2'
 import jwt from 'jsonwebtoken'
 import { findAdminByEmail } from '../repositories/admin'
 import { AppError } from '../middleware/errorHandler'
 import { single } from '../utils/response'
+
+const dummyHash = argon2.hash(randomBytes(32).toString('hex'), { type: argon2.argon2id })
 
 export async function login(req: Request, res: Response, next: NextFunction) {
   try {
@@ -11,8 +14,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
     const admin = await findAdminByEmail(email)
     // Always verify to prevent timing attacks even when user not found
-    const dummyHash = '$argon2id$v=19$m=65536,t=3,p=4$dummysaltdummysalt$dummyhash'
-    const hash = admin?.password_hash ?? dummyHash
+    const hash = admin?.password_hash ?? await dummyHash
 
     const valid = await argon2.verify(hash, password).catch(() => false)
 

@@ -1,5 +1,8 @@
 import { Helmet } from 'react-helmet-async'
 import { siteConfig } from '../data/content'
+import { publicApi } from '../lib/publicApi'
+import { usePublicFetch } from '../hooks/usePublicFetch'
+import { useSiteSettings } from '../context/SiteSettings'
 
 interface PageMetaProps {
   title: string
@@ -30,14 +33,21 @@ export default function PageMeta({
   modifiedTime,
   structuredData,
 }: PageMetaProps) {
-  const fullTitle = title.includes('Prince Monga') ? title : `${title} | Prince Monga`
+  const { data } = usePublicFetch(() => publicApi.siteImages.get())
+  const { settings } = useSiteSettings()
+  const fullTitle = title.includes('Prince Monga')
+    ? title.replace(/Prince Monga/g, settings.displayName)
+    : `${title} | ${settings.displayName}`
 
   const base = siteConfig.canonicalUrl.replace(/\/$/, '')
   const canonical = base ? `${base}${slug ? `/${slug}` : ''}` : undefined
 
-  const socialImage = ogImage || siteConfig.ogImage || undefined
+  const socialImage = ogImage || data?.data.og_image_url || siteConfig.ogImage || undefined
 
   const hasGsc = Boolean(siteConfig.gscVerification)
+  const jsonLd = structuredData
+    ? JSON.stringify(structuredData).replace(/</g, '\\u003c')
+    : undefined
 
   return (
     <Helmet>
@@ -56,7 +66,7 @@ export default function PageMeta({
       )}
 
       {/* Open Graph */}
-      <meta property="og:site_name" content="Prince Monga" />
+      <meta property="og:site_name" content={settings.displayName} />
       <meta property="og:type" content={type} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
@@ -74,9 +84,9 @@ export default function PageMeta({
       {socialImage && <meta name="twitter:image" content={socialImage} />}
 
       {/* JSON-LD structured data */}
-      {structuredData && (
+      {jsonLd && (
         <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
+          {jsonLd}
         </script>
       )}
     </Helmet>

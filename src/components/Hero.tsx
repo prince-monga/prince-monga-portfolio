@@ -1,26 +1,41 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Github, Linkedin, Shield } from 'lucide-react'
 import { siteConfig } from '../data/content'
+import { useSiteSettings } from '../context/SiteSettings'
+import { publicApi } from '../lib/publicApi'
+import { usePublicFetch } from '../hooks/usePublicFetch'
+import ContentImage from './ContentImage'
 
 export default function Hero() {
-  const twitterUrl = siteConfig.twitter?.trim()
-  const hasTwitter = Boolean(twitterUrl && !twitterUrl.startsWith('<!--') && !twitterUrl.includes('REPLACE'))
+  const { settings } = useSiteSettings()
+  const { data } = usePublicFetch(() => publicApi.siteImages.get())
+  const profileImage = data?.data.profile_image_url
+  const profileImageAlt = data?.data.profile_image_alt ?? ''
+  const twitterUrl = settings.twitterUrl.trim()
 
   return (
     <section
       aria-labelledby="hero-heading"
       className="section-padding container-wide py-20 md:py-28"
     >
-      {/* Typographic avatar */}
-      <div
-        aria-hidden="true"
-        className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-blue-600 text-white font-mono font-bold text-lg mb-8 select-none"
-      >
-        PM
+      <div className="mb-8 inline-flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl">
+        <ContentImage
+          src={profileImage}
+          alt={profileImageAlt}
+          className="h-full w-full rounded-xl object-cover"
+          fallback={
+            <div
+              aria-hidden="true"
+              className="inline-flex h-full w-full items-center justify-center rounded-xl bg-blue-600 font-mono text-lg font-bold text-white select-none"
+            >
+              PM
+            </div>
+          }
+        />
       </div>
 
       <p className="text-sm font-mono text-blue-600 dark:text-blue-400 mb-3 tracking-wide">
-        Hi, I'm Prince Monga
+        Hi, I'm {settings.displayName}
       </p>
 
       <h1
@@ -31,8 +46,7 @@ export default function Hero() {
       </h1>
 
       <p className="mt-5 text-base sm:text-lg text-neutral-600 dark:text-neutral-400 max-w-xl leading-relaxed">
-        Full-stack developer and cybersecurity learner from Gurugram, India. I work with React,
-        Java, Python, and Flask — and I write openly about what I'm building and figuring out.
+        {settings.tagline}
       </p>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -54,19 +68,19 @@ export default function Hero() {
       {/* Social links */}
       <div className="mt-6 flex items-center gap-4">
         <a
-          href={siteConfig.github}
+          href={settings.githubUrl}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Prince Monga on GitHub"
+          aria-label={`${settings.displayName} on GitHub`}
           className="text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors"
         >
           <Github size={18} />
         </a>
         <a
-          href={siteConfig.linkedin}
+          href={settings.linkedinUrl}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Prince Monga on LinkedIn"
+          aria-label={`${settings.displayName} on LinkedIn`}
           className="text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors"
         >
           <Linkedin size={18} />
@@ -80,7 +94,7 @@ export default function Hero() {
         >
           <Shield size={18} />
         </a>
-        {hasTwitter && twitterUrl && (
+        {twitterUrl && (
           <a
             href={twitterUrl}
             target="_blank"

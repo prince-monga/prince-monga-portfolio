@@ -39,6 +39,7 @@ export async function adminCreateProject(req: Request, res: Response, next: Next
     single(res, project, 201)
   } catch (err: unknown) {
     if ((err as { code?: string }).code === '23505') return next(new AppError(409, 'Slug already exists'))
+    if ((err as { code?: string }).code === '23503') return next(new AppError(400, 'One or more selected images are no longer available'))
     next(err)
   }
 }
@@ -51,6 +52,7 @@ export async function adminUpdateProject(req: Request, res: Response, next: Next
     single(res, project)
   } catch (err: unknown) {
     if ((err as { code?: string }).code === '23505') return next(new AppError(409, 'Slug already exists'))
+    if ((err as { code?: string }).code === '23503') return next(new AppError(400, 'One or more selected images are no longer available'))
     next(err)
   }
 }

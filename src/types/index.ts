@@ -17,6 +17,14 @@ export interface Project {
   decisions?: string
   learnings?: string
   featured?: boolean
+  imageUrl?: string
+  imageAlt?: string
+  imageGallery?: {
+    assetId: number
+    url: string
+    altText: string
+    caption: string
+  }[]
 }
 
 export interface JourneyMilestone {

@@ -5,6 +5,7 @@ import Breadcrumb from '../components/Breadcrumb'
 import { publicApi } from '../lib/publicApi'
 import { usePublicFetch } from '../hooks/usePublicFetch'
 import { blogPosts as staticPosts, contentSettings } from '../data/content'
+import ContentImage from '../components/ContentImage'
 
 function estimateReadingTime(content: string): number {
   return Math.max(1, Math.ceil(content.trim().split(/\s+/).length / 200))
@@ -20,14 +21,32 @@ function formatDate(iso: string) {
 function renderInline(text: string): React.ReactNode {
   const parts: React.ReactNode[] = []
   // Simple tokeniser for inline patterns
-  const re = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g
+  const re = /(!\[[^\]]*\]\([^)]+\)|`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g
   let last = 0
   let m: RegExpExecArray | null
   let key = 0
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) parts.push(text.slice(last, m.index))
     const token = m[0]
-    if (token.startsWith('`')) {
+    if (token.startsWith('![')) {
+      const imageMatch = token.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)
+      if (imageMatch) {
+        const src = imageMatch[2].trim()
+        if (/^https:\/\//i.test(src)) {
+          parts.push(
+            <ContentImage
+              key={key++}
+              src={src}
+              alt={imageMatch[1]}
+              className="my-5 max-h-[36rem] w-full rounded-lg bg-neutral-100 object-contain dark:bg-neutral-800"
+            />
+          )
+        } else {
+          parts.push(imageMatch[1])
+          key++
+        }
+      }
+    } else if (token.startsWith('`')) {
       parts.push(<code key={key++} className="px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-mono text-[0.8em]">{token.slice(1, -1)}</code>)
     } else if (token.startsWith('**')) {
       parts.push(<strong key={key++} className="font-semibold text-neutral-900 dark:text-neutral-100">{token.slice(2, -2)}</strong>)
@@ -237,6 +256,8 @@ export default function BlogArticlePage() {
   const publishedAt = post?.published_at ?? staticPost?.date ?? null
   const content = post?.content ?? staticPost?.content ?? null
   const readingTime = post?.reading_time_minutes ?? staticPost?.readingTimeMinutes ?? (content ? estimateReadingTime(content) : null)
+  const coverImageUrl = post?.cover_image_url ?? undefined
+  const articleImages = post?.article_images ?? []
 
   return (
     <>
@@ -247,6 +268,7 @@ export default function BlogArticlePage() {
         type="article"
         publishedTime={publishedAt ?? undefined}
         noindex={Boolean(staticPost?.isDemo && !post)}
+        ogImage={coverImageUrl}
       />
 
       <main id="main-content" className="section-padding container-narrow py-16">
@@ -304,6 +326,16 @@ export default function BlogArticlePage() {
           )}
         </header>
 
+        {coverImageUrl && (
+          <figure className="mb-8">
+            <ContentImage
+              src={coverImageUrl}
+              alt={post?.cover_image_alt || title}
+              className="aspect-[16/9] w-full rounded-lg bg-neutral-100 object-cover dark:bg-neutral-800"
+            />
+          </figure>
+        )}
+
         {error && staticPost && (
           <p role="status" className="mb-5 text-xs text-amber-700 dark:text-amber-300">
             The live article service is unavailable; showing the local demo version.
@@ -320,6 +352,30 @@ export default function BlogArticlePage() {
               Article content not yet written.
             </p>
           </div>
+        )}
+
+        {articleImages.length > 0 && (
+          <section aria-labelledby="article-images-heading" className="mt-8 space-y-4">
+            <h2 id="article-images-heading" className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              Article images
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {articleImages.map((image, index) => (
+                <figure key={`${image.asset_id}-${index}`}>
+                  <ContentImage
+                    src={image.url}
+                    alt={image.alt_text}
+                    className="aspect-[4/3] w-full rounded-lg bg-neutral-100 object-cover dark:bg-neutral-800"
+                  />
+                  {image.caption && (
+                    <figcaption className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                      {image.caption}
+                    </figcaption>
+                  )}
+                </figure>
+              ))}
+            </div>
+          </section>
         )}
 
         <div className="mt-10 pt-8 border-t border-neutral-100 dark:border-neutral-800">

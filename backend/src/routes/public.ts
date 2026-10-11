@@ -3,7 +3,7 @@ import rateLimit from 'express-rate-limit'
 import { validate } from '../middleware/validate'
 import {
   slugSchema, projectFilterSchema, blogFilterSchema,
-  journeyFilterSchema, logFilterSchema, contactSchema, paginationSchema,
+  journeyFilterSchema, logFilterSchema, contactSchema,
   timelineFilterSchema,
 } from '../schemas'
 import { listProjects, getProject } from '../controllers/projects'
@@ -12,6 +12,8 @@ import { listJourneyEvents } from '../controllers/journey'
 import { listPublicLogs } from '../controllers/journal'
 import { submitContact } from '../controllers/contact'
 import { listPublicTimeline } from '../controllers/timeline'
+import { getPublicSiteImages, getPublicSiteSettings } from '../controllers/siteSettings'
+import { getPublicImage } from '../controllers/media'
 
 const router = Router()
 
@@ -27,6 +29,9 @@ router.get('/health', (_req, res) => {
   res.json({ success: true, status: 'ok', timestamp: new Date().toISOString() })
 })
 
+router.get('/site-images', getPublicSiteImages)
+router.get('/site-settings', getPublicSiteSettings)
+router.get('/media/:key', getPublicImage)
 router.get('/projects', validate(projectFilterSchema, 'query'), listProjects)
 router.get('/projects/:slug', validate(slugSchema, 'params'), getProject)
 
@@ -39,8 +44,5 @@ router.get('/journal', validate(logFilterSchema, 'query'), listPublicLogs)
 router.get('/timeline', validate(timelineFilterSchema, 'query'), listPublicTimeline)
 
 router.post('/contact', contactLimiter, validate(contactSchema), submitContact)
-
-// Validate pagination for list routes that use paginationSchema
-router.get('/admin', validate(paginationSchema, 'query')) // placeholder — admin routes are separate
 
 export default router

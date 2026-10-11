@@ -1,9 +1,18 @@
 import request from 'supertest'
+import jwt from 'jsonwebtoken'
 import app from '../src/app'
 import { pool } from '../src/config/db'
+import {
+  createBlogPostSchema,
+  createDailyLogSchema,
+  createJourneyEventSchema,
+  createProjectSchema,
+  updateSiteSettingsSchema,
+} from '../src/schemas'
 
 // Helper to check if DB is reachable
 async function dbAvailable(): Promise<boolean> {
+  if (!process.env.TEST_DATABASE_URL) return false
   try {
     await pool.query('SELECT 1')
     return true
@@ -39,6 +48,26 @@ describe('Unknown routes', () => {
   })
 })
 
+describe('CORS', () => {
+  it('allows configured origins and rejects origins outside the allowlist', async () => {
+    const allowed = await request(app)
+      .get('/api/v1/health')
+      .set('Origin', 'http://localhost:5173')
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const rejected = await request(app)
+        .get('/api/v1/health')
+        .set('Origin', 'https://untrusted.example')
+
+      expect(allowed.headers['access-control-allow-origin']).toBe('http://localhost:5173')
+      expect(rejected.status).toBe(403)
+      expect(rejected.headers['access-control-allow-origin']).toBeUndefined()
+    } finally {
+      errorSpy.mockRestore()
+    }
+  })
+})
+
 // ─── Input validation ─────────────────────────────────────────────────────────
 
 describe('Query parameter validation', () => {
@@ -46,6 +75,121 @@ describe('Query parameter validation', () => {
     const res = await request(app).get('/api/v1/projects?page=0')
     expect(res.status).toBe(400)
     expect(res.body.success).toBe(false)
+  })
+
+  describe('Daily log validation', () => {
+    const validLog = {
+      activity_date: '2024-02-29',
+      summary: 'Built a feature',
+    }
+
+    it('accepts a real leap-day date', () => {
+      expect(createDailyLogSchema.safeParse(validLog).success).toBe(true)
+    })
+
+    it('accepts optional image metadata and rejects invalid asset references', () => {
+      expect(createDailyLogSchema.safeParse({
+        ...validLog,
+        image_asset_id: 5,
+        image_alt_text: 'Code editor',
+        image_caption: 'A work in progress',
+      }).success).toBe(true)
+      expect(createDailyLogSchema.safeParse({
+        ...validLog,
+        image_asset_id: 0,
+      }).success).toBe(false)
+    })
+
+    describe('Project image validation', () => {
+      const validProject = {
+        title: 'Project',
+        slug: 'project',
+        summary: 'A project summary',
+        description: 'Project description',
+        category: 'Full Stack',
+        gallery_images: [{ asset_id: 1, alt_text: 'Dashboard view', caption: 'Dashboard' }],
+      }
+
+      it('accepts image metadata and ordered gallery entries', () => {
+        expect(createProjectSchema.safeParse(validProject).success).toBe(true)
+      })
+
+      describe('Blog image validation', () => {
+        const validPost = {
+          title: 'Article',
+          slug: 'article',
+          excerpt: 'Article excerpt',
+          content: 'Article content',
+          category: 'Engineering',
+          article_images: [{ asset_id: 2, alt_text: 'Architecture', caption: 'System diagram' }],
+        }
+
+        it('accepts cover and ordered article image metadata', () => {
+          expect(createBlogPostSchema.safeParse({
+            ...validPost,
+            cover_image_asset_id: 1,
+            cover_image_alt: 'Article cover',
+          }).success).toBe(true)
+        })
+
+        it('rejects invalid asset IDs and oversized article galleries', () => {
+          expect(createBlogPostSchema.safeParse({
+            ...validPost,
+            article_images: [{ asset_id: -1, alt_text: '', caption: '' }],
+          }).success).toBe(false)
+          expect(createBlogPostSchema.safeParse({
+            ...validPost,
+            article_images: Array.from({ length: 21 }, (_, index) => ({
+              asset_id: index + 1,
+              alt_text: '',
+              caption: '',
+            })),
+          }).success).toBe(false)
+        })
+      })
+
+      it('rejects invalid asset IDs and galleries above the configured maximum', () => {
+        expect(createProjectSchema.safeParse({
+          ...validProject,
+          gallery_images: [{ asset_id: 0, alt_text: '', caption: '' }],
+        }).success).toBe(false)
+        expect(createProjectSchema.safeParse({
+          ...validProject,
+          gallery_images: Array.from({ length: 13 }, (_, asset_id) => ({
+            asset_id: asset_id + 1,
+            alt_text: '',
+            caption: '',
+          })),
+        }).success).toBe(false)
+      })
+    })
+
+    it('rejects impossible calendar dates', () => {
+      expect(createDailyLogSchema.safeParse({
+        ...validLog,
+        activity_date: '2026-02-30',
+      }).success).toBe(false)
+    })
+
+  })
+
+  it('accepts optional journey image metadata and rejects invalid asset references', () => {
+    const event = {
+      title: 'Completed a course',
+      description: 'Finished an advanced course.',
+      event_date: '2024-02-29',
+      category: 'milestone',
+    }
+    expect(createJourneyEventSchema.safeParse({
+      ...event,
+      image_asset_id: 5,
+      image_alt_text: 'Certificate',
+      image_caption: 'Course completion',
+    }).success).toBe(true)
+    expect(createJourneyEventSchema.safeParse({
+      ...event,
+      image_asset_id: -1,
+    }).success).toBe(false)
   })
 
   it('rejects limit=100 (exceeds max 50)', async () => {
@@ -78,6 +222,25 @@ describe('Query parameter validation', () => {
   it('rejects invalid timeline time zones', async () => {
     const res = await request(app).get('/api/v1/timeline?from=2026-10-09&to=2026-10-09&timeZone=Not%2FAZone')
     expect(res.status).toBe(400)
+  })
+
+  it('accepts safe site profile values and rejects executable URL schemes', () => {
+    expect(updateSiteSettingsSchema.safeParse({
+      display_name: 'Prince Monga',
+      github_url: 'https://github.com/prince-monga',
+      email: 'hello@example.com',
+    }).success).toBe(true)
+    expect(updateSiteSettingsSchema.safeParse({
+      twitter_url: 'javascript:alert(1)',
+    }).success).toBe(false)
+    expect(createProjectSchema.safeParse({
+      title: 'Project',
+      slug: 'project',
+      summary: 'A project summary',
+      description: 'Project description',
+      category: 'Full Stack',
+      live_demo_url: 'javascript:alert(1)',
+    }).success).toBe(false)
   })
 })
 
@@ -135,6 +298,17 @@ describe('POST /api/v1/admin/login', () => {
 })
 
 describe('Admin routes without token', () => {
+  it('keeps site settings protected', async () => {
+    const res = await request(app).get('/api/v1/admin/site-settings')
+    expect(res.status).toBe(401)
+  })
+
+  it('keeps the admin router protected at its base path', async () => {
+    const res = await request(app).get('/api/v1/admin?page=0')
+    expect(res.status).toBe(401)
+    expect(res.body.success).toBe(false)
+  })
+
   it('returns 401 for GET /api/v1/admin/projects without token', async () => {
     const res = await request(app).get('/api/v1/admin/projects')
     expect(res.status).toBe(401)
@@ -158,6 +332,112 @@ describe('Admin routes with invalid token', () => {
       .get('/api/v1/admin/projects')
       .set('Authorization', 'Bearer this.is.not.valid')
     expect(res.status).toBe(401)
+  })
+})
+
+describe('Admin image uploads', () => {
+  const validAdminToken = () => jwt.sign(
+    { adminId: 1, email: 'admin@example.test' },
+    process.env.JWT_SECRET as string
+  )
+  const pngHeader = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+
+  it('requires admin authentication before accepting image uploads', async () => {
+    const res = await request(app)
+      .post('/api/v1/admin/media/upload')
+      .set('Content-Type', 'image/png')
+      .send(pngHeader)
+    expect(res.status).toBe(401)
+  })
+
+  it('requires admin authentication for private image previews', async () => {
+    const res = await request(app).get('/api/v1/admin/media/1/preview')
+    expect(res.status).toBe(401)
+  })
+
+  it('returns a clear error when image storage is not configured', async () => {
+    const envKeys = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME'] as const
+    const previous = Object.fromEntries(envKeys.map(key => [key, process.env[key]]))
+    for (const key of envKeys) delete process.env[key]
+
+    try {
+      const res = await request(app)
+        .post('/api/v1/admin/media/upload')
+        .set('Authorization', `Bearer ${validAdminToken()}`)
+        .set('Content-Type', 'image/png')
+        .send(pngHeader)
+      expect(res.status).toBe(503)
+      expect(res.body.success).toBe(false)
+      expect(res.body.error).toBe('Image storage is not configured')
+      expect(res.body.data).toBeUndefined()
+    } finally {
+      for (const key of envKeys) {
+        const value = previous[key]
+        if (value === undefined) delete process.env[key]
+        else process.env[key] = value
+      }
+    }
+  })
+
+  it('rejects unsupported media types', async () => {
+    const res = await request(app)
+      .post('/api/v1/admin/media/upload')
+      .set('Authorization', `Bearer ${validAdminToken()}`)
+      .set('Content-Type', 'image/svg+xml')
+      .send('<svg/>')
+    expect(res.status).toBe(415)
+  })
+
+  it('rejects uploads larger than 8 MB', async () => {
+    const res = await request(app)
+      .post('/api/v1/admin/media/upload')
+      .set('Authorization', `Bearer ${validAdminToken()}`)
+      .set('Content-Type', 'image/png')
+      .send(Buffer.alloc(8 * 1024 * 1024 + 1))
+    expect(res.status).toBe(413)
+    expect(res.body.error).toBe('Request body too large')
+  })
+
+  it('rejects file content that does not match its declared image type', async () => {
+    const res = await request(app)
+      .post('/api/v1/admin/media/upload')
+      .set('Authorization', `Bearer ${validAdminToken()}`)
+      .set('Content-Type', 'image/png')
+      .send(Buffer.from('GIF89a'))
+    expect(res.status).toBe(415)
+  })
+
+  it('returns a configuration error rather than pretending upload succeeded', async () => {
+    const envKeys = [
+      'R2_ACCOUNT_ID',
+      'R2_ACCESS_KEY_ID',
+      'R2_SECRET_ACCESS_KEY',
+      'R2_BUCKET_NAME',
+      'R2_PUBLIC_BASE_URL',
+    ] as const
+    const previous = Object.fromEntries(envKeys.map(key => [key, process.env[key]]))
+    process.env.R2_ACCOUNT_ID = 'invalid'
+    process.env.R2_ACCESS_KEY_ID = 'test-access-key'
+    process.env.R2_SECRET_ACCESS_KEY = 'test-secret-key'
+    process.env.R2_BUCKET_NAME = 'test-bucket'
+    process.env.R2_PUBLIC_BASE_URL = 'https://images.example.test'
+
+    try {
+      const res = await request(app)
+        .post('/api/v1/admin/media/upload')
+        .set('Authorization', `Bearer ${validAdminToken()}`)
+        .set('Content-Type', 'image/png')
+        .send(pngHeader)
+      expect(res.status).toBe(503)
+      expect(res.body.success).toBe(false)
+      expect(res.body.data).toBeUndefined()
+    } finally {
+      for (const key of envKeys) {
+        const value = previous[key]
+        if (value === undefined) delete process.env[key]
+        else process.env[key] = value
+      }
+    }
   })
 })
 

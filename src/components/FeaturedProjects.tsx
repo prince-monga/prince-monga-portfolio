@@ -3,10 +3,18 @@ import { Github, ExternalLink, ArrowRight } from 'lucide-react'
 import { publicApi, type ApiProject } from '../lib/publicApi'
 import { projects as staticProjects } from '../data/content'
 import { usePublicFetch } from '../hooks/usePublicFetch'
+import ContentImage from './ContentImage'
 
 function ProjectCard({ project }: { project: ApiProject }) {
   return (
     <article className="border border-neutral-200 dark:border-neutral-800 rounded-lg p-5 flex flex-col gap-3 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors bg-white dark:bg-neutral-900">
+      {project.image_url && (
+        <ContentImage
+          src={project.image_url}
+          alt={project.image_alt_text}
+          className="aspect-[16/9] w-full rounded-md bg-neutral-100 object-cover dark:bg-neutral-800"
+        />
+      )}
       <div>
         <span className="text-xs font-mono text-blue-600 dark:text-blue-400 block mb-1">
           {project.category}
@@ -82,6 +90,9 @@ function staticToApi(p: typeof staticProjects[0]): ApiProject {
     repository_url: p.repoUrl ?? null,
     live_demo_url: p.liveUrl ?? null,
     image_url: null,
+    image_asset_id: null,
+    image_alt_text: '',
+    gallery_images: [],
     featured: p.featured ?? false,
     status: 'published',
     created_at: '',

@@ -7,6 +7,7 @@ import { publicApi, type ApiProject } from '../lib/publicApi'
 import { projects as staticProjects, projectCategories } from '../data/content'
 import { usePublicFetch } from '../hooks/usePublicFetch'
 import type { Project } from '../types'
+import ContentImage from '../components/ContentImage'
 
 // Normalise API project to the shape used by the UI
 function fromApi(p: ApiProject): Project {
@@ -22,6 +23,14 @@ function fromApi(p: ApiProject): Project {
     liveUrl: p.live_demo_url ?? undefined,
     status: 'complete',
     featured: p.featured,
+    imageUrl: p.image_url ?? undefined,
+    imageAlt: p.image_alt_text,
+    imageGallery: p.gallery_images.map(image => ({
+      assetId: image.asset_id,
+      url: image.url,
+      altText: image.alt_text,
+      caption: image.caption,
+    })),
   }
 }
 
@@ -29,35 +38,44 @@ function ProjectRow({ project }: { project: Project }) {
   return (
     <article className="py-6 border-b border-neutral-100 dark:border-neutral-800 last:border-0">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <span className="text-xs font-mono text-blue-600 dark:text-blue-400">
-              {project.category}
-            </span>
-            {project.status === 'in-progress' && (
-              <span className="text-xs font-mono text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950 px-1.5 py-0.5 rounded">
-                in progress
+        <div className="flex min-w-0 flex-1 items-start gap-4">
+          {project.imageUrl && (
+            <ContentImage
+              src={project.imageUrl}
+              alt={project.imageAlt ?? ''}
+              className="h-16 w-20 shrink-0 rounded-md bg-neutral-100 object-cover dark:bg-neutral-800"
+            />
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <span className="text-xs font-mono text-blue-600 dark:text-blue-400">
+                {project.category}
               </span>
-            )}
-          </div>
+              {project.status === 'in-progress' && (
+                <span className="text-xs font-mono text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950 px-1.5 py-0.5 rounded">
+                  in progress
+                </span>
+              )}
+            </div>
 
-          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100 leading-snug">
-            <Link
-              to={`/projects/${project.slug}`}
-              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              {project.title}
-            </Link>
-          </h2>
+            <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100 leading-snug">
+              <Link
+                to={`/projects/${project.slug}`}
+                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              >
+                {project.title}
+              </Link>
+            </h2>
 
-          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
-            {project.problem}
-          </p>
+            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
+              {project.problem}
+            </p>
 
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {project.tech.map(t => (
-              <TechTag key={t} label={t} />
-            ))}
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {project.tech.map(t => (
+                <TechTag key={t} label={t} />
+              ))}
+            </div>
           </div>
         </div>
 

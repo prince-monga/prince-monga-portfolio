@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Mail } from 'lucide-react'
-import { siteConfig } from '../data/content'
+import { useSiteSettings } from '../context/SiteSettings'
 
 export default function Contact() {
+  const { settings } = useSiteSettings()
   return (
     <section
       id="contact"
@@ -30,12 +31,14 @@ export default function Contact() {
             Start a conversation
             <ArrowRight size={14} aria-hidden="true" />
           </Link>
-          <a
-            href={`mailto:${siteConfig.email}`}
-            className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
-          >
-            {siteConfig.email}
-          </a>
+          {settings.email && (
+            <a
+              href={`mailto:${settings.email}`}
+              className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+            >
+              {settings.email}
+            </a>
+          )}
         </div>
       </div>
     </section>

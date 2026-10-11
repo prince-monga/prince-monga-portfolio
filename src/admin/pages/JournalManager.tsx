@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { journal as api, type DailyLog } from '../api'
+import ImageManager, { type ManagedImage } from '../components/ImageManager'
 import { useFetch } from '../hooks/useFetch'
 import {
   PageHeader, Button, StatusBadge, LoadingState, ErrorState, EmptyState,
@@ -223,6 +224,24 @@ export default function JournalManager() {
                 <option value="public">Public</option>
               </Select>
             </Field>
+
+            <ImageManager
+              label="Entry image (optional)"
+              images={editing.image_asset_id && editing.image_url ? [{
+                asset_id: editing.image_asset_id,
+                url: editing.image_url,
+                alt_text: editing.image_alt_text ?? '',
+                caption: editing.image_caption ?? '',
+              }] : []}
+              onChange={(images: ManagedImage[]) => setEditing(log => ({
+                ...log!,
+                image_asset_id: images[0]?.asset_id ?? null,
+                image_alt_text: images[0]?.alt_text ?? '',
+                image_caption: images[0]?.caption ?? '',
+                image_url: undefined,
+              }))}
+              multiple={false}
+            />
 
             <div className="flex gap-3 justify-end pt-2 border-t border-neutral-800">
               <Button variant="secondary" onClick={closeModal}>Cancel</Button>

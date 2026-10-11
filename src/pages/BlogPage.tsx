@@ -180,7 +180,7 @@ export default function BlogPage() {
                       {post.cover_image_url && (
                         <img
                           src={post.cover_image_url}
-                          alt=""
+                          alt={post.cover_image_alt || post.title}
                           loading="lazy"
                           className="relative h-full w-full object-cover"
                           onError={event => { event.currentTarget.style.display = 'none' }}

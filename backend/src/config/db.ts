@@ -12,7 +12,8 @@ export const pool = new Pool({
 })
 
 pool.on('error', (err) => {
-  console.error('Unexpected database pool error:', err.message)
+  const code = 'code' in err && typeof err.code === 'string' ? err.code : 'unknown'
+  console.error('Unexpected database pool error:', code)
 })
 
 export async function closePool(): Promise<void> {

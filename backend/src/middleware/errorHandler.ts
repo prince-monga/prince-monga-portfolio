@@ -41,6 +41,11 @@ export function errorHandler(
   }
 
   // Unexpected errors — log internally, never expose details
-  console.error('Unhandled error:', err)
+  const errorName = err instanceof Error ? err.name : 'UnknownError'
+  const errorCode =
+    typeof err === 'object' && err !== null && 'code' in err && typeof err.code === 'string'
+      ? err.code
+      : undefined
+  console.error('Unhandled request error:', errorName, errorCode ?? '')
   res.status(500).json({ success: false, error: 'Internal server error' })
 }

@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { Github, Linkedin, Shield } from 'lucide-react'
 import { siteConfig } from '../data/content'
+import { useSiteSettings } from '../context/SiteSettings'
 
 const footerSections = [
   {
@@ -29,9 +30,10 @@ const footerSections = [
 ]
 
 export default function Footer() {
+  const { settings } = useSiteSettings()
   const year = new Date().getFullYear()
-  const hasGithub = !siteConfig.github.startsWith('<!--')
-  const hasLinkedin = !siteConfig.linkedin.startsWith('<!--')
+  const hasGithub = Boolean(settings.githubUrl)
+  const hasLinkedin = Boolean(settings.linkedinUrl)
 
   return (
     <footer className="border-t border-neutral-200 dark:border-neutral-800 mt-8">
@@ -43,18 +45,18 @@ export default function Footer() {
             <NavLink
               to="/"
               className="font-mono text-sm font-semibold text-neutral-900 dark:text-neutral-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors block mb-2"
-              aria-label="Prince Monga — home"
+              aria-label={`${settings.displayName} — home`}
             >
               pm<span className="text-blue-600 dark:text-blue-400">.</span>
             </NavLink>
             <p className="text-xs text-neutral-400 dark:text-neutral-600 leading-relaxed">
-              Full-stack developer from Gurugram, India. Building and learning in public.
+              {settings.tagline}
             </p>
             {(hasGithub || hasLinkedin) && (
               <div className="mt-3 flex items-center gap-3">
                 {hasGithub && (
                   <a
-                    href={siteConfig.github}
+                    href={settings.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="GitHub"
@@ -65,7 +67,7 @@ export default function Footer() {
                 )}
                 {hasLinkedin && (
                   <a
-                    href={siteConfig.linkedin}
+                    href={settings.linkedinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="LinkedIn"

@@ -6,6 +6,7 @@ import TechTag from '../components/TechTag'
 import { publicApi } from '../lib/publicApi'
 import { usePublicFetch } from '../hooks/usePublicFetch'
 import { projects as staticProjects } from '../data/content'
+import ContentImage from '../components/ContentImage'
 
 export default function ProjectDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -54,6 +55,15 @@ export default function ProjectDetailPage() {
   const repoUrl = apiProject?.repository_url ?? staticProject?.repoUrl ?? null
   const liveUrl = apiProject?.live_demo_url ?? staticProject?.liveUrl ?? null
   const isInProgress = (apiProject?.status ?? staticProject?.status) === 'in-progress'
+  const coverImageUrl = apiProject?.image_url ?? staticProject?.imageUrl
+  const coverImageAlt = apiProject?.image_alt_text || staticProject?.imageAlt || title
+  const galleryImages = apiProject?.gallery_images ?? (staticProject?.imageGallery ?? []).map(image => ({
+    asset_id: image.assetId,
+    url: image.url,
+    alt_text: image.altText,
+    caption: image.caption,
+  }))
+  const visibleGallery = galleryImages.filter(image => image.asset_id !== apiProject?.image_asset_id)
 
   // Rich detail fields only available in static data for now
   const goals = staticProject?.goals
@@ -70,6 +80,7 @@ export default function ProjectDetailPage() {
         description={problem}
         slug={`projects/${slug}`}
         type="article"
+        ogImage={coverImageUrl ?? undefined}
       />
 
       <main id="main-content" className="section-padding container-narrow py-16">
@@ -133,6 +144,40 @@ export default function ProjectDetailPage() {
             </div>
           )}
         </div>
+
+        {coverImageUrl && (
+          <figure className="mb-8">
+            <ContentImage
+              src={coverImageUrl}
+              alt={coverImageAlt}
+              className="aspect-[16/9] w-full rounded-lg bg-neutral-100 object-cover dark:bg-neutral-800"
+            />
+          </figure>
+        )}
+
+        {visibleGallery.length > 0 && (
+          <section aria-labelledby="project-gallery-heading" className="mb-8">
+            <h2 id="project-gallery-heading" className="mb-3 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              Project gallery
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {visibleGallery.map((image, index) => (
+                <figure key={`${image.asset_id}-${index}`}>
+                  <ContentImage
+                    src={image.url}
+                    alt={image.alt_text}
+                    className="aspect-[4/3] w-full rounded-lg bg-neutral-100 object-cover dark:bg-neutral-800"
+                  />
+                  {image.caption && (
+                    <figcaption className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                      {image.caption}
+                    </figcaption>
+                  )}
+                </figure>
+              ))}
+            </div>
+          </section>
+        )}
 
         <hr className="border-neutral-100 dark:border-neutral-800 mb-8" />
 

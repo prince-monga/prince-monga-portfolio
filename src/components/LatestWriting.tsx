@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import { publicApi, type ApiBlogPost } from '../lib/publicApi'
 import { usePublicFetch } from '../hooks/usePublicFetch'
+import ContentImage from './ContentImage'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })
@@ -78,6 +79,14 @@ export default function LatestWriting() {
                     {post.title}
                   </Link>
                 </h3>
+
+                {post.cover_image_url && (
+                  <ContentImage
+                    src={post.cover_image_url}
+                    alt={post.cover_image_alt || post.title}
+                    className="mt-3 aspect-[16/8] w-full max-w-md rounded-md bg-neutral-100 object-cover dark:bg-neutral-800"
+                  />
+                )}
 
                 <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed max-w-2xl">
                   {post.excerpt}

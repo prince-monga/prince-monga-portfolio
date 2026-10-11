@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { BookOpen, ChevronDown, Loader2 } from 'lucide-react'
 import PageMeta from '../components/PageMeta'
+import ContentImage from '../components/ContentImage'
 import { publicApi, type ApiDailyLog } from '../lib/publicApi'
 import { usePublicFetch } from '../hooks/usePublicFetch'
 
@@ -34,6 +35,21 @@ function EntryCard({ entry }: { entry: ApiDailyLog }) {
           {entry.summary}
         </p>
       </div>
+
+      {entry.image_url && (
+        <figure className="mb-4">
+          <ContentImage
+            src={entry.image_url}
+            alt={entry.image_alt_text}
+            className="max-h-[28rem] w-full rounded-md border border-neutral-200 object-cover dark:border-neutral-800"
+          />
+          {entry.image_caption && (
+            <figcaption className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+              {entry.image_caption}
+            </figcaption>
+          )}
+        </figure>
+      )}
 
       {entry.work_completed && (
         <div className="mb-3">
@@ -90,7 +106,7 @@ function EntryCard({ entry }: { entry: ApiDailyLog }) {
 export default function JournalPage() {
   const [monthFilter, setMonthFilter] = useState<string>('all')
 
-  const { data, loading } = usePublicFetch(() => publicApi.journal.list({ limit: 50 }))
+  const { data, loading, error } = usePublicFetch(() => publicApi.journal.list({ limit: 50 }))
 
   const entries = data?.data ?? []
 
@@ -128,8 +144,14 @@ export default function JournalPage() {
           </div>
         )}
 
+        {!loading && error && (
+          <p className="text-sm text-red-600 dark:text-red-400 py-4">
+            Unable to load journal: {error}
+          </p>
+        )}
+
         {/* Month filter */}
-        {!loading && months.length > 1 && (
+        {!loading && !error && months.length > 1 && (
           <div className="flex flex-wrap gap-2 mb-8">
             {months.map(m => (
               <button
@@ -153,7 +175,7 @@ export default function JournalPage() {
           </div>
         )}
 
-        {!loading && entries.length === 0 && (
+        {!loading && !error && entries.length === 0 && (
           <div className="border border-dashed border-neutral-200 dark:border-neutral-800 rounded-lg p-10 flex flex-col items-center text-center gap-3">
             <BookOpen size={20} className="text-neutral-300 dark:text-neutral-700" aria-hidden="true" />
             <p className="text-sm text-neutral-400 dark:text-neutral-600">
@@ -165,13 +187,13 @@ export default function JournalPage() {
           </div>
         )}
 
-        {!loading && filtered.length === 0 && entries.length > 0 && (
+        {!loading && !error && filtered.length === 0 && entries.length > 0 && (
           <p className="text-sm text-neutral-400 dark:text-neutral-600 py-8">
             No entries for this period.
           </p>
         )}
 
-        {!loading && filtered.length > 0 && (
+        {!loading && !error && filtered.length > 0 && (
           <div className="space-y-4">
             {filtered
               .slice()

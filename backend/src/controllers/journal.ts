@@ -38,7 +38,12 @@ export async function adminUpdateLog(req: Request, res: Response, next: NextFunc
     const log = await repo.updateDailyLog(id, req.body)
     if (!log) return next(new AppError(404, 'Log not found'))
     single(res, log)
-  } catch (err) { next(err) }
+  } catch (err: unknown) {
+    if ((err as { code?: string }).code === '23505') {
+      return next(new AppError(409, 'A log for this date already exists'))
+    }
+    next(err)
+  }
 }
 
 export async function adminDeleteLog(req: Request, res: Response, next: NextFunction) {

@@ -14,6 +14,16 @@ export const slugSchema = z.object({
 // ─── Projects ─────────────────────────────────────────────────────────────────
 
 const projectCategories = ['Frontend', 'Backend', 'Full Stack', 'Experiment'] as const
+const safeWebUrlSchema = z.string().url().refine(value => {
+  const protocol = new URL(value).protocol
+  return protocol === 'http:' || protocol === 'https:'
+}, 'URL must use HTTP or HTTPS')
+const optionalSafeWebUrlSchema = safeWebUrlSchema.optional().or(z.literal(''))
+const projectGalleryImageSchema = z.object({
+  asset_id: z.number().int().positive(),
+  alt_text: z.string().max(300),
+  caption: z.string().max(500),
+})
 
 export const projectFilterSchema = paginationSchema.extend({
   category: z.enum(projectCategories).optional(),
@@ -27,9 +37,12 @@ export const createProjectSchema = z.object({
   description:    z.string().min(1),
   technologies:   z.array(z.string().min(1).max(100)).max(20).default([]),
   category:       z.enum(projectCategories),
-  repository_url: z.string().url().optional().or(z.literal('')),
-  live_demo_url:  z.string().url().optional().or(z.literal('')),
-  image_url:      z.string().url().optional().or(z.literal('')),
+  repository_url: optionalSafeWebUrlSchema,
+  live_demo_url:  optionalSafeWebUrlSchema,
+  image_url:      optionalSafeWebUrlSchema,
+  image_asset_id: z.number().int().positive().nullable().optional(),
+  image_alt_text: z.string().max(300).optional(),
+  gallery_images: z.array(projectGalleryImageSchema).max(12).default([]),
   featured:       z.boolean().default(false),
   status:         z.enum(['draft', 'published', 'archived']).default('draft'),
 })
@@ -37,6 +50,12 @@ export const createProjectSchema = z.object({
 export const updateProjectSchema = createProjectSchema.partial()
 
 // ─── Blog Posts ───────────────────────────────────────────────────────────────
+
+const articleImageSchema = z.object({
+  asset_id: z.number().int().positive(),
+  alt_text: z.string().max(300),
+  caption: z.string().max(500),
+})
 
 export const blogFilterSchema = paginationSchema.extend({
   category: z.string().min(1).max(100).optional(),
@@ -53,7 +72,10 @@ export const createBlogPostSchema = z.object({
   tags:             z.array(z.string().min(1).max(100)).max(20).default([]),
   seo_title:        z.string().max(70).optional(),
   meta_description: z.string().max(160).optional(),
-  cover_image_url:  z.string().url().optional().or(z.literal('')),
+  cover_image_url:  optionalSafeWebUrlSchema,
+  cover_image_asset_id: z.number().int().positive().nullable().optional(),
+  cover_image_alt: z.string().max(300).optional(),
+  article_images: z.array(articleImageSchema).max(20).default([]),
   status:           z.enum(['draft', 'published', 'archived']).default('draft'),
 })
 
@@ -73,6 +95,9 @@ export const createJourneyEventSchema = z.object({
   event_date:  z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   category:    z.enum(journeyCategories),
   visibility:  z.enum(['public', 'private']).default('public'),
+  image_asset_id: z.number().int().positive().nullable().optional(),
+  image_alt_text: z.string().max(300).optional(),
+  image_caption: z.string().max(500).optional(),
 })
 
 export const updateJourneyEventSchema = createJourneyEventSchema.partial()
@@ -83,10 +108,12 @@ export const logFilterSchema = paginationSchema.extend({
   month: z.string().regex(/^\d{4}-\d{2}$/).optional(),
 })
 
-const timelineDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => {
+const calendarDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => {
   const date = new Date(`${value}T00:00:00.000Z`)
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
 }, 'Invalid calendar date')
+
+const timelineDateSchema = calendarDateSchema
 
 function isValidTimeZone(value: string) {
   try {
@@ -110,7 +137,7 @@ export const timelineFilterSchema = z.object({
 })
 
 export const createDailyLogSchema = z.object({
-  activity_date:   z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  activity_date:   calendarDateSchema,
   summary:         z.string().min(1).max(500),
   work_completed:  z.string().default(''),
   lessons_learned: z.string().default(''),
@@ -118,9 +145,33 @@ export const createDailyLogSchema = z.object({
   next_steps:      z.string().default(''),
   minutes_worked:  z.number().int().min(0).max(1440).optional(),
   visibility:      z.enum(['public', 'private']).default('private'),
+  image_asset_id: z.number().int().positive().nullable().optional(),
+  image_alt_text: z.string().max(300).optional(),
+  image_caption: z.string().max(500).optional(),
 })
 
 export const updateDailyLogSchema = createDailyLogSchema.partial()
+
+// ─── Site-wide images ─────────────────────────────────────────────────────────
+
+const siteImageReferenceSchema = z.object({
+  asset_id: z.number().int().positive(),
+  alt_text: z.string().max(300),
+})
+
+export const updateSiteImagesSchema = z.object({
+  profile_image: siteImageReferenceSchema.nullable().optional(),
+  og_image: siteImageReferenceSchema.nullable().optional(),
+})
+
+export const updateSiteSettingsSchema = z.object({
+  display_name: z.string().trim().min(1).max(100).optional(),
+  tagline: z.string().trim().max(300).optional(),
+  github_url: optionalSafeWebUrlSchema,
+  linkedin_url: optionalSafeWebUrlSchema,
+  twitter_url: optionalSafeWebUrlSchema,
+  email: z.union([z.string().trim().email().max(254), z.literal('')]).optional(),
+})
 
 // ─── Contact ──────────────────────────────────────────────────────────────────
 

@@ -1,4 +1,5 @@
 import type { Project, JourneyMilestone, BlogPost, Article, Service, JournalEntry, StreakDay } from '../types'
+import { SITE_URL } from '../lib/apiConfig'
 
 // Switch to false when real published content is ready to replace the demo previews.
 export const contentSettings = { demoMode: true, timeZone: 'Asia/Kolkata' }
@@ -15,9 +16,7 @@ export const siteConfig = {
   linkedin: 'https://linkedin.com/in/prince-monga',
   tryhackme: 'https://tryhackme.com/p/princemonga',
   twitter: '',
-  // Set this to your real domain before deploying. Used for canonical URLs, OG, and sitemap.
-  // Example: 'https://princemonga.dev'
-  canonicalUrl: '',
+  canonicalUrl: SITE_URL,
   // Set to an absolute URL once you create an OG image (1200x630 PNG recommended)
   ogImage: '',
   // Google Search Console verification meta tag value — set after you verify

@@ -7,6 +7,9 @@ node_modules/
 .env.*
 !.env.example
 !**/.env.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 
 # Build output and coverage
 dist/
@@ -15,6 +18,9 @@ build/
 **/build/
 coverage/
 **/coverage/
+.vercel/
+.wrangler/
+*.tsbuildinfo
 
 # Logs and temporary files
 *.log
