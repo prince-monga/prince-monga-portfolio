@@ -15,8 +15,7 @@ export const slugSchema = z.object({
 
 const projectCategories = ['Frontend', 'Backend', 'Full Stack', 'Experiment'] as const
 const safeWebUrlSchema = z.string().url().refine(value => {
-  const protocol = new URL(value).protocol
-  return protocol === 'http:' || protocol === 'https:'
+  return /^https?:\/\//i.test(value)
 }, 'URL must use HTTP or HTTPS')
 const optionalSafeWebUrlSchema = safeWebUrlSchema.optional().or(z.literal(''))
 const projectGalleryImageSchema = z.object({

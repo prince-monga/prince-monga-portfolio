@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import app from '../src/app'
 import { pool } from '../src/config/db'
 import * as blogRepository from '../src/repositories/blog'
+import type { BlogPost } from '../src/repositories/blog'
 import {
   createBlogPostSchema,
   createDailyLogSchema,
@@ -128,9 +129,25 @@ describe('Query parameter validation', () => {
         it('accepts cover and ordered article image metadata', () => {
           expect(createBlogPostSchema.safeParse({
             ...validPost,
+            cover_image_url: '',
             cover_image_asset_id: 1,
             cover_image_alt: 'Article cover',
           }).success).toBe(true)
+        })
+
+        it('accepts an empty cover URL and rejects non-HTTP URL values without throwing', () => {
+          expect(createBlogPostSchema.safeParse({
+            ...validPost,
+            cover_image_url: '',
+          }).success).toBe(true)
+          expect(createBlogPostSchema.safeParse({
+            ...validPost,
+            cover_image_url: '/api/v1/media/example',
+          }).success).toBe(false)
+          expect(createBlogPostSchema.safeParse({
+            ...validPost,
+            cover_image_url: 'javascript:alert(1)',
+          }).success).toBe(false)
         })
 
         it('rejects invalid asset IDs and oversized article galleries', () => {
@@ -337,7 +354,7 @@ describe('Admin routes with invalid token', () => {
 })
 
 describe('GET /api/v1/admin/blog database errors', () => {
-  it('keeps the response generic and logs the PostgreSQL schema diagnostic', async () => {
+  it('keeps the response generic and logs only the PostgreSQL SQLSTATE', async () => {
     const databaseError = Object.assign(
       new Error('column p.cover_image_asset_id does not exist'),
       { code: '42703' }
@@ -360,12 +377,73 @@ describe('GET /api/v1/admin/blog database errors', () => {
       expect(res.text).not.toContain('cover_image_asset_id')
       expect(errorSpy).toHaveBeenCalledWith('Unhandled request error:', {
         errorName: 'Error',
-        errorCode: '42703',
-        databaseMessage: 'column p.cover_image_asset_id does not exist',
+        sqlState: '42703',
       })
+      expect(JSON.stringify(errorSpy.mock.calls)).not.toContain('cover_image_asset_id')
     } finally {
       repositorySpy.mockRestore()
       errorSpy.mockRestore()
+    }
+  })
+})
+
+describe('POST /api/v1/admin/blog URL validation', () => {
+  it('accepts the editor direct-publish payload when no cover image is selected', async () => {
+    const post: BlogPost = {
+      id: 1,
+      title: 'Direct publish validation regression',
+      slug: 'direct-publish-validation-regression',
+      excerpt: 'A regression test for URL validation.',
+      content: 'Article content',
+      category: 'Engineering',
+      tags: [],
+      seo_title: null,
+      meta_description: null,
+      cover_image_url: null,
+      cover_image_asset_id: null,
+      cover_image_alt: '',
+      article_images: [],
+      status: 'published',
+      published_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    const repositorySpy = jest.spyOn(blogRepository, 'insertPost').mockResolvedValue(post)
+    const token = jwt.sign(
+      { adminId: 1, email: 'admin@example.test' },
+      process.env.JWT_SECRET as string
+    )
+
+    try {
+      const res = await request(app)
+        .post('/api/v1/admin/blog')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          title: post.title,
+          slug: post.slug,
+          excerpt: post.excerpt,
+          content: post.content,
+          category: post.category,
+          tags: [],
+          seo_title: '',
+          meta_description: '',
+          cover_image_url: '',
+          cover_image_asset_id: null,
+          cover_image_alt: '',
+          article_images: [],
+          status: 'published',
+        })
+
+      expect(res.status).toBe(201)
+      expect(res.body).toMatchObject({ success: true, data: { status: 'published' } })
+      expect(repositorySpy).toHaveBeenCalledWith(expect.objectContaining({
+        cover_image_url: '',
+        cover_image_asset_id: null,
+        article_images: [],
+        status: 'published',
+      }))
+    } finally {
+      repositorySpy.mockRestore()
     }
   })
 })
