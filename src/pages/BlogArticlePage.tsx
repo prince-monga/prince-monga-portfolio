@@ -109,7 +109,7 @@ function ArticleContent({ content }: { content: string }) {
   let key = 0
 
   return (
-    <div className="space-y-4 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">
+    <div className="article-body space-y-5 text-base text-neutral-700 dark:text-neutral-300 leading-[1.85]">
       {blocks.map(block => {
         const k = key++
 
@@ -217,7 +217,7 @@ export default function BlogArticlePage() {
 
   if (loading) {
     return (
-      <main id="main-content" className="section-padding container-narrow py-16">
+      <main id="main-content" className="article-page section-padding container-narrow py-16">
         <div className="flex items-center gap-2 text-sm text-neutral-400">
           <Loader2 size={14} className="animate-spin" aria-hidden="true" />
           Loading article…
@@ -297,7 +297,7 @@ export default function BlogArticlePage() {
             )}
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-100 leading-tight mb-3">
+          <h1 className="page-title text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-100 leading-tight mb-3">
             {title}
           </h1>
 

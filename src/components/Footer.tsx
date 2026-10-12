@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { Github, Linkedin, Shield } from 'lucide-react'
 import { siteConfig } from '../data/content'
 import { useSiteSettings } from '../context/SiteSettings'
+import BrandMark from './BrandMark'
 
 const footerSections = [
   {
@@ -42,12 +43,8 @@ export default function Footer() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-1">
-            <NavLink
-              to="/"
-              className="font-mono text-sm font-semibold text-neutral-900 dark:text-neutral-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors block mb-2"
-              aria-label={`${settings.displayName} — home`}
-            >
-              pm<span className="text-blue-600 dark:text-blue-400">.</span>
+            <NavLink to="/" className="brand-link mb-3 inline-flex" aria-label={`${settings.displayName} — home`}>
+              <BrandMark />
             </NavLink>
             <p className="text-xs text-neutral-400 dark:text-neutral-600 leading-relaxed">
               {settings.tagline}

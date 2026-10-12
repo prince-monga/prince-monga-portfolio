@@ -77,7 +77,7 @@ export default function BlogPage() {
       />
 
       <main id="main-content" className="section-padding container-wide py-16">
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
+        <h1 className="page-title text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2 sm:text-4xl">
           Writing
         </h1>
         <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-8 max-w-xl">
@@ -98,7 +98,7 @@ export default function BlogPage() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             aria-label="Search articles"
-            className="w-full pl-8 pr-3 py-2 text-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-md text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-400"
+            className="w-full rounded-lg border border-neutral-200 bg-white/80 py-2.5 pl-9 pr-3 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-neutral-700 dark:bg-neutral-900/80 dark:text-neutral-100 dark:placeholder-neutral-600 dark:focus:ring-blue-400"
           />
         </div>
 
@@ -115,8 +115,8 @@ export default function BlogPage() {
               aria-pressed={activeCategory === cat}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 activeCategory === cat
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-900/20'
+                  : 'border border-neutral-200 bg-white/70 text-neutral-600 hover:border-blue-300 hover:text-blue-700 dark:border-neutral-800 dark:bg-neutral-900/70 dark:text-neutral-400 dark:hover:border-blue-500/40 dark:hover:text-blue-300'
               }`}
             >
               {cat}
@@ -167,7 +167,7 @@ export default function BlogPage() {
             ) : (
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {filtered.map(post => (
-                  <article key={post.slug} className="overflow-hidden rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+                  <article key={post.slug} className="interactive-card overflow-hidden rounded-xl border border-neutral-200 bg-white/85 dark:border-neutral-800 dark:bg-neutral-900/85">
                     <div className="relative aspect-[16/8] overflow-hidden bg-neutral-100 dark:bg-neutral-800">
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span aria-hidden="true" className="text-6xl font-semibold text-neutral-300 dark:text-neutral-700">
@@ -182,7 +182,7 @@ export default function BlogPage() {
                           src={post.cover_image_url}
                           alt={post.cover_image_alt || post.title}
                           loading="lazy"
-                          className="relative h-full w-full object-cover"
+                          className="relative h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]"
                           onError={event => { event.currentTarget.style.display = 'none' }}
                         />
                       )}

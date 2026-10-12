@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Github, ExternalLink, Loader2 } from 'lucide-react'
+import { Github, ExternalLink } from 'lucide-react'
 import PageMeta from '../components/PageMeta'
 import TechTag from '../components/TechTag'
 import { publicApi, type ApiProject } from '../lib/publicApi'
@@ -36,7 +36,7 @@ function fromApi(p: ApiProject): Project {
 
 function ProjectRow({ project }: { project: Project }) {
   return (
-    <article className="py-6 border-b border-neutral-100 dark:border-neutral-800 last:border-0">
+    <article className="interactive-card rounded-xl border border-transparent p-4 sm:p-5 hover:border-neutral-200 hover:bg-white/70 dark:hover:border-neutral-800 dark:hover:bg-neutral-900/60">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-start gap-4">
           {project.imageUrl && (
@@ -143,7 +143,7 @@ export default function ProjectsPage() {
       />
 
       <main id="main-content" className="section-padding container-wide py-16">
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
+        <h1 className="page-title text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2 sm:text-4xl">
           Projects
         </h1>
         <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-8 max-w-xl">
@@ -164,8 +164,8 @@ export default function ProjectsPage() {
               aria-pressed={activeCategory === cat}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 activeCategory === cat
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-900/20'
+                  : 'border border-neutral-200 bg-white/70 text-neutral-600 hover:border-blue-300 hover:text-blue-700 dark:border-neutral-800 dark:bg-neutral-900/70 dark:text-neutral-400 dark:hover:border-blue-500/40 dark:hover:text-blue-300'
               }`}
             >
               {cat}
@@ -174,9 +174,14 @@ export default function ProjectsPage() {
         </div>
 
         {loading && (
-          <div className="flex items-center gap-2 py-4 text-sm text-neutral-400">
-            <Loader2 size={14} className="animate-spin" aria-hidden="true" />
-            Loading projects…
+          <div role="status" aria-label="Loading projects" className="grid gap-3 py-4">
+            {[0, 1, 2].map(item => (
+              <div key={item} className="surface-card rounded-xl p-5">
+                <div className="skeleton h-4 w-1/3 rounded" />
+                <div className="skeleton mt-3 h-5 w-2/3 rounded" />
+                <div className="skeleton mt-3 h-4 w-full max-w-xl rounded" />
+              </div>
+            ))}
           </div>
         )}
 

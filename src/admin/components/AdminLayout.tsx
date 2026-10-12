@@ -6,6 +6,7 @@ import {
   Flame, Inbox, Settings, LogOut, Menu, X, ExternalLink,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import BrandMark from '../../components/BrandMark'
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -36,11 +37,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }`
 
   const sidebar = (
-    <aside className="w-56 flex-shrink-0 flex flex-col bg-neutral-900 border-r border-neutral-800 h-full">
+    <aside className="admin-sidebar w-56 flex-shrink-0 flex flex-col bg-neutral-900 border-r border-neutral-800 h-full">
       <div className="px-4 py-4 border-b border-neutral-800 flex items-center justify-between">
-        <span className="font-mono text-sm font-semibold text-neutral-100">
-          pm<span className="text-blue-400">.</span>admin
-        </span>
+        <BrandMark admin compact />
         <button
           className="lg:hidden text-neutral-400 hover:text-neutral-100"
           onClick={() => setSidebarOpen(false)}
@@ -93,7 +92,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <title>Admin | Prince Monga</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
-      <div className="min-h-screen flex bg-neutral-950 text-neutral-100">
+      <div className="admin-shell admin-surface min-h-screen flex text-neutral-100">
       {/* Desktop sidebar */}
       <div className="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:w-56">
         {sidebar}
@@ -124,12 +123,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <Menu size={20} />
           </button>
-          <span className="font-mono text-sm font-semibold text-neutral-100">
-            pm<span className="text-blue-400">.</span>admin
-          </span>
+          <BrandMark admin compact />
         </header>
 
-        <main className="flex-1 p-6 max-w-6xl w-full mx-auto min-w-0">
+        <main className="admin-content flex-1 p-4 sm:p-6 w-full mx-auto min-w-0">
           {children}
         </main>
       </div>

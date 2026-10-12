@@ -20,7 +20,7 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <main id="main-content" className="section-padding container-narrow py-16">
+      <main id="main-content" className="project-detail section-padding container-narrow py-16">
         <div className="flex items-center gap-2 text-sm text-neutral-400">
           <Loader2 size={14} className="animate-spin" aria-hidden="true" />
           Loading project…
@@ -36,7 +36,7 @@ export default function ProjectDetailPage() {
     return (
       <>
         <PageMeta title="Project not found | Prince Monga" description="This project doesn't exist." />
-        <main id="main-content" className="section-padding container-narrow py-16">
+        <main id="main-content" className="project-detail section-padding container-narrow py-16">
           <p className="text-neutral-500 dark:text-neutral-400 mb-4">Project not found.</p>
           <Link to="/projects" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
             ← Back to projects
@@ -105,7 +105,7 @@ export default function ProjectDetailPage() {
             )}
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-100 leading-tight mb-3">
+          <h1 className="page-title text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-100 leading-tight mb-3">
             {title}
           </h1>
 
@@ -179,7 +179,7 @@ export default function ProjectDetailPage() {
           </section>
         )}
 
-        <hr className="border-neutral-100 dark:border-neutral-800 mb-8" />
+        <hr className="border-neutral-200/70 dark:border-neutral-800/70 mb-8" />
 
         <Section title="Overview">
           <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">

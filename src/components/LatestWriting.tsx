@@ -16,7 +16,7 @@ export default function LatestWriting() {
   return (
     <section
       aria-labelledby="writing-heading"
-      className="section-padding container-wide py-16 border-t border-neutral-100 dark:border-neutral-800"
+      className="section-padding container-wide py-16 border-t border-neutral-200/70 dark:border-neutral-800/70"
     >
       <div className="flex items-baseline justify-between mb-8">
         <div>
@@ -56,7 +56,7 @@ export default function LatestWriting() {
         <>
           <div className="flex flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
             {posts.map(post => (
-              <article key={post.id} className="py-5 first:pt-0 last:pb-0">
+              <article key={post.id} className="interactive-card rounded-xl border border-transparent px-4 py-5 first:pt-5 last:pb-5 hover:border-neutral-200 hover:bg-white/60 dark:hover:border-neutral-800 dark:hover:bg-neutral-900/50">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-xs font-mono text-blue-600 dark:text-blue-400">
                     {post.category}

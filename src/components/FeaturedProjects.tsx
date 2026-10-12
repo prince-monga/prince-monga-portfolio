@@ -7,12 +7,12 @@ import ContentImage from './ContentImage'
 
 function ProjectCard({ project }: { project: ApiProject }) {
   return (
-    <article className="border border-neutral-200 dark:border-neutral-800 rounded-lg p-5 flex flex-col gap-3 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors bg-white dark:bg-neutral-900">
+    <article className="interactive-card border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 flex flex-col gap-3 bg-white/80 dark:bg-neutral-900/80">
       {project.image_url && (
         <ContentImage
           src={project.image_url}
           alt={project.image_alt_text}
-          className="aspect-[16/9] w-full rounded-md bg-neutral-100 object-cover dark:bg-neutral-800"
+          className="aspect-[16/9] w-full rounded-lg bg-neutral-100 object-cover dark:bg-neutral-800"
         />
       )}
       <div>
@@ -116,7 +116,7 @@ export default function FeaturedProjects() {
   return (
     <section
       aria-labelledby="projects-heading"
-      className="section-padding container-wide py-16 border-t border-neutral-100 dark:border-neutral-800"
+      className="section-padding container-wide py-16 border-t border-neutral-200/70 dark:border-neutral-800/70"
     >
       <div className="flex items-baseline justify-between mb-8">
         <div>

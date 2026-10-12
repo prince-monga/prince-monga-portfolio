@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#2563eb"/>
-  <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle"
-    font-family="Inter, sans-serif" font-size="13" font-weight="700" fill="white">PM</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none">
+  <rect x="1" y="1" width="34" height="34" rx="10" fill="#111915" stroke="#39ff88" stroke-opacity=".34"/>
+  <path d="M8.5 25V11h5.3c3.3 0 5 1.7 5 4.3s-1.7 4.3-5 4.3H8.5m12 5.4V11l5.1 6.2 5.1-6.2v14" stroke="#dbe8df" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="29.5" cy="28.5" r="1.5" fill="#39ff88"/>
 </svg>

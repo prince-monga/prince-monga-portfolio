@@ -13,9 +13,9 @@ export const siteConfig = {
   phone: '+91 95182 19823',
   email: 'princemonga421@gmail.com',
   github: 'https://github.com/prince-monga',
-  linkedin: 'https://linkedin.com/in/prince-monga',
+  linkedin: 'https://linkedin.com/in/prince-monga-',
   tryhackme: 'https://tryhackme.com/p/princemonga',
-  twitter: '',
+  twitter: 'https://x.com/Prince_monga7',
   canonicalUrl: SITE_URL,
   // Set to an absolute URL once you create an OG image (1200x630 PNG recommended)
   ogImage: '',

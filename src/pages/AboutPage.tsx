@@ -18,7 +18,7 @@ export default function AboutPage() {
       />
 
       <main id="main-content" className="section-padding container-narrow py-16">
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
+        <h1 className="page-title text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2 sm:text-4xl">
           About me
         </h1>
         <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-10">
@@ -34,7 +34,7 @@ export default function AboutPage() {
         )}
 
         {/* Quick facts */}
-        <div className="flex flex-wrap gap-4 mb-10 pb-10 border-b border-neutral-100 dark:border-neutral-800">
+        <div className="surface-card flex flex-wrap gap-x-5 gap-y-3 mb-10 rounded-xl p-4 sm:p-5">
           <span className="inline-flex items-center gap-1.5 text-sm text-neutral-600 dark:text-neutral-400">
             <MapPin size={14} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
             {siteConfig.location}

@@ -13,9 +13,9 @@ export function PageHeader({
   action?: ReactNode
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 mb-6">
+    <div className="flex items-start justify-between gap-4 mb-7 border-b border-neutral-800/80 pb-5">
       <div>
-        <h1 className="text-xl font-semibold text-neutral-100">{title}</h1>
+        <h1 className="page-title text-2xl font-semibold text-neutral-100 sm:text-3xl">{title}</h1>
         {description && <p className="mt-1 text-sm text-neutral-400">{description}</p>}
       </div>
       {action && <div className="flex-shrink-0">{action}</div>}
@@ -35,7 +35,7 @@ export function StatCard({
   sub?: string
 }) {
   return (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4">
+    <div className="admin-stat-card rounded-xl p-4 sm:p-5">
       <p className="text-xs text-neutral-500 uppercase tracking-wide">{label}</p>
       <p className="mt-1 text-2xl font-semibold text-neutral-100">{value}</p>
       {sub && <p className="mt-0.5 text-xs text-neutral-500">{sub}</p>}
@@ -73,7 +73,7 @@ export function Button({
     <button
       {...props}
       disabled={disabled || loading}
-      className={`inline-flex items-center gap-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+      className={`inline-flex items-center gap-2 rounded-lg font-medium transition-[transform,box-shadow,background-color] hover:-translate-y-px active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed
         ${size === 'sm' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'}
         ${variantClass[variant]} ${className}`}
     >
@@ -161,8 +161,14 @@ export function StatusBadge({ status }: { status: string }) {
 
 export function LoadingState() {
   return (
-    <div className="flex items-center justify-center py-16">
-      <Loader2 size={24} className="animate-spin text-neutral-500" />
+    <div role="status" aria-label="Loading" className="grid grid-cols-1 gap-3 py-8 sm:grid-cols-2">
+      {[0, 1, 2, 3].map(item => (
+        <div key={item} className="admin-stat-card rounded-xl p-5">
+          <div className="skeleton h-3 w-1/3 rounded" />
+          <div className="skeleton mt-4 h-7 w-1/2 rounded" />
+          <div className="skeleton mt-3 h-3 w-2/3 rounded" />
+        </div>
+      ))}
     </div>
   )
 }

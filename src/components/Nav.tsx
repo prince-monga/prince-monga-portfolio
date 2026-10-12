@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Menu, X, Sun, Moon } from 'lucide-react'
 import { useTheme } from '../hooks/useTheme'
+import BrandMark from './BrandMark'
 
 const primaryLinks = [
   { to: '/', label: 'Home' },
@@ -50,25 +51,31 @@ export default function Nav() {
     }`
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm border-b border-neutral-200 dark:border-neutral-800">
+    <header className="site-header sticky top-0 z-50 border-b border-neutral-200/70 bg-white/80 backdrop-blur-xl dark:border-neutral-800/70 dark:bg-neutral-950/75">
       <nav
-        className="container-wide section-padding flex items-center justify-between h-14"
+        className="container-wide section-padding flex items-center justify-between h-16"
         aria-label="Primary navigation"
       >
         {/* Wordmark */}
-        <NavLink
-          to="/"
-          className="font-mono text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-shrink-0"
-          aria-label="Prince Monga — home"
-        >
-          pm<span className="text-blue-600 dark:text-blue-400">.</span>
+        <NavLink to="/" className="brand-link flex-shrink-0" aria-label="Prince Monga — home">
+          <BrandMark />
         </NavLink>
 
         {/* Desktop primary links */}
-        <ul className="hidden md:flex items-center gap-6" role="list">
+        <ul className="hidden md:flex items-center gap-1 rounded-full border border-neutral-200/70 bg-neutral-100/65 p-1 dark:border-neutral-800 dark:bg-neutral-900/65" role="list">
           {primaryLinks.map(link => (
             <li key={link.to}>
-              <NavLink to={link.to} className={linkClass} end={link.to === '/'}>
+              <NavLink
+                to={link.to}
+                className={({ isActive }) =>
+                  `rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                    isActive
+                      ? 'bg-white text-blue-700 shadow-sm dark:bg-neutral-800 dark:text-blue-300'
+                      : linkClass({ isActive })
+                  }`
+                }
+                end={link.to === '/'}
+              >
                 {link.label}
               </NavLink>
             </li>
@@ -80,7 +87,7 @@ export default function Nav() {
           <button
             onClick={toggle}
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-            className="p-2 rounded-md text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            className="p-2 rounded-full text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
           >
             {theme === 'light' ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
           </button>
@@ -88,7 +95,7 @@ export default function Nav() {
           {/* Mobile menu button */}
           <button
             ref={menuButtonRef}
-            className="md:hidden p-2 rounded-md text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            className="md:hidden p-2 rounded-full text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
             onClick={() => setOpen(o => !o)}
             aria-expanded={open}
             aria-controls="mobile-menu"
@@ -104,9 +111,9 @@ export default function Nav() {
         <div
           id="mobile-menu"
           ref={menuRef}
-          className="md:hidden border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950"
-          role="dialog"
-          aria-label="Navigation menu"
+          className="md:hidden border-t border-neutral-200 dark:border-neutral-800 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-xl"
+          role="region"
+          aria-label="Mobile navigation menu"
         >
           <ul className="section-padding py-3 flex flex-col gap-1" role="list">
             {allMobileLinks.map(link => (

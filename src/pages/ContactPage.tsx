@@ -96,7 +96,7 @@ export default function ContactPage() {
       />
 
       <main id="main-content" className="section-padding container-narrow py-16">
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
+        <h1 className="page-title text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2 sm:text-4xl">
           Get in touch
         </h1>
         <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-10 max-w-md">
@@ -104,7 +104,7 @@ export default function ContactPage() {
           the form and I'll get back to you.
         </p>
 
-        <div className="grid lg:grid-cols-3 gap-10">
+        <div className="grid gap-10 lg:grid-cols-3">
           {/* Form */}
           <div className="lg:col-span-2">
             {status === 'success' ? (
@@ -127,7 +127,7 @@ export default function ContactPage() {
               <form
                 onSubmit={handleSubmit}
                 aria-label="Project enquiry form"
-                className="space-y-5"
+                className="surface-card rounded-2xl p-5 sm:p-7 space-y-5"
                 noValidate
               >
                 {status === 'error' && serverError && (
@@ -260,7 +260,7 @@ export default function ContactPage() {
           </div>
 
           {/* Sidebar */}
-          <aside className="space-y-6">
+          <aside className="contact-aside space-y-6">
             <div>
               <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
                 Direct contact

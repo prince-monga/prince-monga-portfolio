@@ -5,6 +5,7 @@ import LatestWriting from '../components/LatestWriting'
 import JourneyPreview from '../components/JourneyPreview'
 import DailyBuilding from '../components/DailyBuilding'
 import AboutPreview from '../components/AboutPreview'
+import CodingProfiles from '../components/CodingProfiles'
 import Contact from '../components/Contact'
 import { publicApi } from '../lib/publicApi'
 import { usePublicFetch } from '../hooks/usePublicFetch'
@@ -34,6 +35,7 @@ export default function HomePage() {
         <JourneyPreview />
         <DailyBuilding />
         <AboutPreview />
+        <CodingProfiles />
         <Contact />
       </main>
     </>

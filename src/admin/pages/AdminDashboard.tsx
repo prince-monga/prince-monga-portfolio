@@ -1,4 +1,5 @@
 import { FolderKanban, FileText, Inbox, Flame } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { stats } from '../api'
 import { useFetch } from '../hooks/useFetch'
 import { PageHeader, StatCard, LoadingState, ErrorState } from '../components/ui'
@@ -48,14 +49,16 @@ export default function AdminDashboard() {
           { icon: Inbox, label: 'View Inquiries', href: '/admin/inquiries', color: 'text-yellow-400' },
           { icon: Flame, label: 'Streak Tracker', href: '/admin/streak', color: 'text-orange-400' },
         ].map(({ icon: Icon, label, href, color }) => (
-          <a
+          <Link
             key={href}
-            href={href}
-            className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 flex items-center gap-3 hover:border-neutral-600 transition-colors"
+            to={href}
+            className="interactive-card surface-card rounded-xl p-4 flex items-center gap-3"
           >
-            <Icon size={20} className={color} />
+            <span className={`flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-800/70 ${color}`}>
+              <Icon size={19} />
+            </span>
             <span className="text-sm font-medium text-neutral-200">{label}</span>
-          </a>
+          </Link>
         ))}
       </div>
     </div>

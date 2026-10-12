@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { useAuth } from '../hooks/useAuth'
 import { Button, Input, Field, Alert } from '../components/ui'
+import BrandMark from '../../components/BrandMark'
 
 export default function AdminLoginPage() {
   const { login, isLoading } = useAuth()
@@ -32,18 +33,20 @@ export default function AdminLoginPage() {
         <title>Admin sign in | Prince Monga</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
-      <div className="min-h-screen flex items-center justify-center bg-neutral-950 px-4">
-        <div className="w-full max-w-sm">
+      <div className="admin-surface min-h-screen flex items-center justify-center px-4 py-10">
+        <main aria-labelledby="admin-login-heading" className="w-full max-w-md">
           <div className="mb-8 text-center">
-            <span className="font-mono text-lg font-semibold text-neutral-100">
-              pm<span className="text-blue-400">.</span>admin
-            </span>
-            <p className="mt-2 text-sm text-neutral-500">Sign in to your workspace</p>
+            <BrandMark admin />
+            <h1 id="admin-login-heading" className="mt-3 text-2xl font-semibold tracking-tight text-neutral-100">
+              Welcome back
+            </h1>
+            <p className="eyebrow mt-4">Private workspace</p>
+            <p className="mt-2 text-sm text-neutral-400">Sign in to manage your portfolio</p>
           </div>
 
           <form
             onSubmit={handleSubmit}
-            className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 space-y-4"
+            className="surface-card rounded-2xl p-6 sm:p-8 space-y-5"
             noValidate
           >
             {error && <Alert type="error" message={error} />}
@@ -82,7 +85,7 @@ export default function AdminLoginPage() {
           <p className="mt-6 text-center text-xs text-neutral-600">
             This page is not publicly linked. Admin access only.
           </p>
-        </div>
+        </main>
       </div>
     </>
   )
