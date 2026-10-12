@@ -46,6 +46,16 @@ export function errorHandler(
     typeof err === 'object' && err !== null && 'code' in err && typeof err.code === 'string'
       ? err.code
       : undefined
-  console.error('Unhandled request error:', errorName, errorCode ?? '')
+  const databaseMessage =
+    errorCode && /^\d{5}$/.test(errorCode) &&
+    typeof err === 'object' && err !== null &&
+    'message' in err && typeof err.message === 'string'
+      ? err.message.slice(0, 500)
+      : undefined
+  console.error('Unhandled request error:', {
+    errorName,
+    errorCode,
+    ...(databaseMessage ? { databaseMessage } : {}),
+  })
   res.status(500).json({ success: false, error: 'Internal server error' })
 }

@@ -2,6 +2,7 @@ import request from 'supertest'
 import jwt from 'jsonwebtoken'
 import app from '../src/app'
 import { pool } from '../src/config/db'
+import * as blogRepository from '../src/repositories/blog'
 import {
   createBlogPostSchema,
   createDailyLogSchema,
@@ -332,6 +333,40 @@ describe('Admin routes with invalid token', () => {
       .get('/api/v1/admin/projects')
       .set('Authorization', 'Bearer this.is.not.valid')
     expect(res.status).toBe(401)
+  })
+})
+
+describe('GET /api/v1/admin/blog database errors', () => {
+  it('keeps the response generic and logs the PostgreSQL schema diagnostic', async () => {
+    const databaseError = Object.assign(
+      new Error('column p.cover_image_asset_id does not exist'),
+      { code: '42703' }
+    )
+    const repositorySpy = jest.spyOn(blogRepository, 'findAllPosts')
+      .mockRejectedValue(databaseError)
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    try {
+      const token = jwt.sign(
+        { adminId: 1, email: 'admin@example.test' },
+        process.env.JWT_SECRET as string
+      )
+      const res = await request(app)
+        .get('/api/v1/admin/blog')
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(res.status).toBe(500)
+      expect(res.body).toEqual({ success: false, error: 'Internal server error' })
+      expect(res.text).not.toContain('cover_image_asset_id')
+      expect(errorSpy).toHaveBeenCalledWith('Unhandled request error:', {
+        errorName: 'Error',
+        errorCode: '42703',
+        databaseMessage: 'column p.cover_image_asset_id does not exist',
+      })
+    } finally {
+      repositorySpy.mockRestore()
+      errorSpy.mockRestore()
+    }
   })
 })
 
